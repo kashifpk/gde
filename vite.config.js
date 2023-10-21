@@ -13,6 +13,9 @@ const STATIC_URL = process.env.STATIC_URL;
 export default defineConfig({
   base: `${STATIC_URL}`,
   clearScreen: false,
+  css: {
+    devSourcemap: true,
+  },
   plugins: [
     vue()
   ],

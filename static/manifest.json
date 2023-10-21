@@ -1,0 +1,22 @@
+{
+  "gde/js/index.css": {
+    "file": "index-707ebf53.css",
+    "src": "gde/js/index.css"
+  },
+  "gde/js/index.js": {
+    "css": [
+      "index-707ebf53.css"
+    ],
+    "file": "vuehello-614a4ce2.js",
+    "imports": [
+      "gde/js/main.js"
+    ],
+    "isEntry": true,
+    "src": "gde/js/index.js"
+  },
+  "gde/js/main.js": {
+    "file": "main-3cfb730f.js",
+    "isEntry": true,
+    "src": "gde/js/main.js"
+  }
+}

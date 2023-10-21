@@ -1,12 +1,13 @@
-<html>
-<head>
-  <title>Graph Data Explorer</title>
-</head>
-<body>
-  <h1>Graph Data Explorer</h1>
-  <div id="vue-section"></div>
+{% extends "/base.html" %}
+{% block title %}Home{% endblock %}
 
+
+{% block content %}
+  <h1>Graph Data Explorer</h1>
+  <div class="h-100" id="vue-section"></div>
+{% endblock %}
+
+{% block footerscripts %}
   <script type="module" src="http://127.0.0.1:3333/static/gde/js/index.js"></script>
   <script type="module" src="http://localhost:3333/static/@vite/client"></script>
-</body>
-</html>
+{% endblock %}

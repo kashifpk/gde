@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Style -->
+    <link href="/static/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/static/fonts/fonts.css" rel="stylesheet" />
+    <link href="/static/mdb.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/static/style.css" />
+
+    <title>Graph Data Explorer - {% block title %}{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="w-100 vh-100">
+    {% block header %}{% endblock %}
+
+    <div class="content container h-100">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- scripts -->
+    <!-- <script src="/static/mdb/js/mdb.es.min.js"></script> -->
+    <!-- <script src="/static/nebra-sense.js"></script> -->
+
+    {% block footerscripts %}
+    {% endblock %}
+</body>
+</html>

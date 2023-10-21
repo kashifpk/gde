@@ -2,6 +2,6 @@ import 'vite/modulepreload-polyfill'
 
 import mountVueComponent from './common_vue.js'
 
-import VueHello from './VueHello.vue'
+import GDEMain from './GDEMain.vue'
 
-mountVueComponent('vue-section', VueHello, true);
+mountVueComponent('vue-section', GDEMain, true);
