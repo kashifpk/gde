@@ -1,133 +1,365 @@
+<style>
+.graph {
+  border: 1px solid #c0c0c0;
+  height: 92vh;
+
+}
+
+.v-ng-container {
+  background-color: #1b1b1b;
+}
+.add-edge-div {
+  border: 1px solid #1d1f22;
+  padding: 10px;
+}
+
+.status {
+  border-top: 2px solid #1b1b1b;
+}
+</style>
+
 <template>
-  <MDBRow><MDBCol>Hello {{ name }}!!! </MDBCol></MDBRow>
+
   <MDBRow>
-    <MDBCol col="2"><MDBBtn>Add node</MDBBtn></MDBCol>
+    <MDBCol col="2">
+      <MDBRow class="mb-4">
+        <MDBCol col="3">
+          <MDBBtn outline="light" floating @click="newGraph()">
+            <MDBIcon icon="file"></MDBIcon>
+          </MDBBtn>
+        </MDBCol>
+        <MDBCol col="3">
+          <MDBBtn outline="info" floating @click="loadGraph()">
+            <MDBIcon icon="book-open"></MDBIcon>
+          </MDBBtn>
+        </MDBCol>
+        <MDBCol col="3">
+          <MDBBtn outline="success" floating @click="saveGraph()">
+            <MDBIcon icon="save"></MDBIcon>
+          </MDBBtn>
+        </MDBCol>
+      </MDBRow>
+
+      <MDBInput v-model="graphName" label="Graph name" class="mb-2" />
+
+
+      <MDBSwitch v-model="linkMode" label="Link mode" />
+
+      <br />
+      <div class="add-edge-div">
+        <MDBInput label="new_link_from" v-model="newLinkFrom" /><br />
+        <MDBInput label="new_link_to" v-model="newLinkTo" /><br />
+        <MDBBtn color="primary" @click="addNewEdge()">Add Link</MDBBtn>
+
+      </div>
+      <MDBBtn color="info" @click="openDetailWindow()">Open Detail Window</MDBBtn>
+    </MDBCol>
     <MDBCol>
       <div ref="graphDiv">
         <v-network-graph ref="graph" class="graph"
         :nodes="nodes" :edges="edges" :layouts="layouts"
-        :configs="config" :event-handlers="eventHandlers" />
+        :configs="config" :event-handlers="eventHandlers">
+
+          <template #edge-label="{ edge, ...slotProps }">
+            <v-edge-label :text="edge.label" align="center" fill="#ffe7dc" vertical-align="above" v-bind="slotProps" />
+          </template>
+        </v-network-graph>
+
       </div>
 
     </MDBCol>
   </MDBRow>
+
   <MDBModal
-    id="addNodeModel"
+    id="nodeEditor"
     tabindex="-1"
-    labelledby="addNodeModelLabel"
-    v-model="displayAddNodeDialog"
+    v-model="displayEditorModal"
+    size="lg"
     centered
+    scrollable
   >
-    <MDBModalHeader>
-      <MDBModalTitle> Add Node </MDBModalTitle>
-    </MDBModalHeader>
-    <MDBModalBody>
-      <MDBInput ref="nodeNameTextBox" label="Node name" v-model="newNodeName" />
-    </MDBModalBody>
-    <MDBModalFooter>
-      <MDBBtn color="secondary" @click="displayAddNodeDialog = false">Close</MDBBtn>
-      <MDBBtn color="primary" @click="addNewNode()">Save changes</MDBBtn>
-    </MDBModalFooter>
+    <NodeEditor :mode="editorMode" :node-type="currentNodeType" v-model="nodeData"
+                @cancel="displayEditorModal=false" @save="nodeEditorUpdated()" />
   </MDBModal>
+
+  <MDBRow class="status" :class="{ 'text-danger': hasError }">
+    <MDBCol class="h-100 text-center">{{ statusMessage }}</MDBCol>
+  </MDBRow>
 
 </template>
 
 <script setup>
 
-import {getCurrentInstance, onMounted, computed, ref, watch} from "vue";
-import { MDBRow, MDBCol,
-         MDBModal, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter,
-         MDBBtn, MDBInput, } from "mdb-vue-ui-kit";
+  import axios from "axios";
 
-const name = ref("VueJS")
-const graph = ref()
-const graphDiv = ref(null)
-const nodeNameTextBox = ref()
-const displayAddNodeDialog = ref(false)
-const newNodeName = ref("")
-const newNodePosition = {x: 10, y: 10}
+  import {VNetworkGraph, VEdgeLabel} from "v-network-graph"
+  import "v-network-graph/lib/style.css"
 
+  import { useActiveElement, useMagicKeys, whenever } from '@vueuse/core'
+  import { logicAnd } from '@vueuse/math'
 
-const nodes = ref({
-  node1: { name: "Node 1" },
-  node2: { name: "Node X" },
-  node3: { name: "Node 3" },
-  node4: { name: "Node 4" },
-})
+  import {onMounted, computed, ref, reactive, nextTick} from "vue";
+  import { MDBRow, MDBCol,
+          MDBModal,
+          MDBBtn, MDBInput, MDBSwitch, MDBIcon} from "mdb-vue-ui-kit";
 
-const edges = ref({
-  edge1: { source: "node1", target: "node2" },
-  edge2: { source: "node2", target: "node3" },
-  edge3: { source: "node3", target: "node4" },
-})
+  import NodeEditor from "./components/NodeEditor.vue";
 
-const layouts = ref({
-  nodes: {
-    node3: { x: 0, y: 0}
+  const statusMessage = ref("Status")
+  const hasError = ref(false)
+
+  const displayEditorModal = ref(false)
+
+  const graphName = ref("untitled")
+  const graph = ref()
+  const graphDiv = ref(null)
+  const detailWindow = ref(null)
+
+  const editorMode = ref("")
+  const currentNodeType = ref("")
+
+  const newNodePosition = {x: 10, y: 10}
+
+  const nodeData = ref({})
+  const linkMode = ref(false)
+  const newLinkFrom = ref("")
+  const newLinkTo = ref("")
+
+  const activeElement = useActiveElement()
+
+  const notUsingInput = computed(() =>
+    activeElement.value?.tagName !== 'INPUT'
+    && activeElement.value?.tagName !== 'TEXTAREA',
+  )
+
+  const isDetailWindowPresent = () => {
+    if (detailWindow.value && detailWindow.value.closed)
+      detailWindow.value = null
+
+    return detailWindow.value != null
   }
-})
 
-const config = ref({
-  view: {
-    doubleClickZoomEnabled: false,
-    scalingObjects: true,
+  const { l } = useMagicKeys()
+  whenever(logicAnd(l, notUsingInput), () => {
+    if (!displayEditorModal.value) {
+      linkMode.value = !linkMode.value
+    }
+
+  })
+
+  const nodes = ref({
+    // node1: { name: "Node 1" },
+    // node2: { name: "Node X" },
+    // node3: { name: "Node 3" },
+    // node4: { name: "Node 4" },
+  })
+
+  const edges = ref({
+    // edge1: { source: "node1", target: "node2" },
+    // edge2: { source: "node2", target: "node3" },
+    // edge3: { source: "node3", target: "node4" },
+  })
+
+  const layouts = ref({
+    nodes: {
+      // node3: { x: 0, y: 0}
+    }
+  })
+
+  const config = ref({
+    view: {
+      doubleClickZoomEnabled: false,
+      scalingObjects: true,
+    },
+    node: {
+      label: {
+        directionAutoAdjustment: true,
+        text: "label",
+        color: "#c077d5"
+      }
+    },
+    edge: {
+      marker: {
+        target: {
+          type: 'arrow'
+        }
+      }
+    }
+  })
+
+  const eventHandlers = {
+    "node:click":  ({ node }) => {
+      // toggle
+      if (linkMode.value == false){
+        if (isDetailWindowPresent()) {
+          let data = nodes.value[node]
+          data._key = node
+          detailWindow.value.postMessage(
+            JSON.stringify({event: 'show-node', data: data}),
+            import.meta.env.VITE_WEBSITE_BASE_URL
+          )
+        }
+        return;
+      }
+
+
+      if (newLinkFrom.value == "") {
+        newLinkFrom.value = node
+      } else if (newLinkTo.value == "") {
+        newLinkTo.value = node
+        addNewEdge()
+      }
+    },
+    "node:dblclick":  ({ node }) => {
+      let data = nodes.value[node]
+      data._key = node
+
+      nodeData.value = {...data}
+      editorMode.value = 'update'
+      currentNodeType.value = 'node'
+
+      displayEditorModal.value = true
+    },
+    "edge:dblclick": ({ edge }) => {
+      let data = edges.value[edge]
+      data._key = edge
+
+      nodeData.value = {...data}
+      editorMode.value = 'update'
+      currentNodeType.value = 'edge'
+
+      displayEditorModal.value = true
+
+    },
+    "view:dblclick": async (e) => {
+
+      const viewBox = graph.value.getViewBox()
+
+      editorMode.value = 'new'
+      currentNodeType.value = 'node'
+
+      // ** Best so far
+      newNodePosition.x = e.event.offsetX + viewBox.left
+      newNodePosition.y = e.event.offsetY + viewBox.top
+
+      console.log("new node position", newNodePosition)
+
+      displayEditorModal.value = true
+      nodeData.value._key = graphName.value + '-'
+      nodeData.value.label = null
+      nodeData.value.extraInfo = {}
+
+    }
   }
-})
 
+  onMounted(async() => {
 
+  });
 
-const eventHandlers = {
-  "view:dblclick": (e) => {
-    console.log(e)
-    console.log("Event x and y", e.event.x, e.event.y)
-    console.log("Event offset x and y", e.event.offsetX, e.event.offsetY)
-    console.log("Event client x and y", e.event.clientX, e.event.clientY)
+  const nodeEditorUpdated = () => {
+    if (editorMode.value == 'new' && currentNodeType.value == 'node') {
+      addNewNode()
+    }
 
-    const viewBox = graph.value.getViewBox()
-    const svgSize = graph.value.getSizes()
-    const domPos = graph.value.translateFromSvgToDomCoordinates({x: e.event.x, y: e.event.y})
-    const svgPos = graph.value.translateFromDomToSvgCoordinates({x: e.event.x, y: e.event.y})
-    console.log("viewBox", viewBox)
-    console.log("domPos", domPos)
-    console.log("svgPos", svgPos)
-    // ** Best so far
-    // newNodePosition.x = e.event.offsetX - (domPos.x / 2)
-    // newNodePosition.y = e.event.offsetY - (domPos.y / 2)
-    newNodePosition.x = e.event.offsetX + viewBox.left
-    newNodePosition.y = e.event.offsetY + viewBox.top
-
-    // newNodePosition.x = e.event.x - (svgSize.width / 2)
-    // newNodePosition.y = e.event.y - (svgSize.height / 2)
-
-    // newNodePosition.x = e.event.offsetX - (graphDiv.value.clientWidth / 2)
-    // newNodePosition.y = e.event.offsetY - (graphDiv.value.clientHeight / 2)
-    console.log("new node position", newNodePosition)
-    // newNodePosition.x = e.event.offsetX
-    // newNodePosition.y = e.event.offsetY
-    displayAddNodeDialog.value = true
-    // console.log(nodeNameTextBox)
-    // nodeNameTextBox.value.focus()
+    if (editorMode.value == 'update') {
+      updateNode()
+    }
   }
-}
 
-onMounted(async() => {
-  console.log(graph.value)
-  console.log(graphDiv.value)
-});
+  const addNewNode = () => {
+    displayEditorModal.value = false
 
-const addNewNode = () => {
-  displayAddNodeDialog.value = false;
-  nodes.value[newNodeName.value] = { name: newNodeName.value}
-  layouts.value.nodes[newNodeName.value] = {x: newNodePosition.x, y: newNodePosition.y}
-}
+    console.log("New node's data", nodeData.value)
+    nodes.value[nodeData.value._key] = JSON.parse(JSON.stringify(nodeData.value))  // deep copy
+    layouts.value.nodes[nodeData.value._key] = {x: newNodePosition.x, y: newNodePosition.y}
+  }
 
+  const addNewEdge = () => {
+    const linkKey = newLinkFrom.value + '_' + newLinkTo.value
+    edges.value[linkKey] = { source: newLinkFrom.value, target: newLinkTo.value }
+    newLinkFrom.value = ""
+    newLinkTo.value = ""
+  }
+
+  const updateNode = () => {
+    let key = nodeData.value._key
+    delete nodeData.value._key
+
+    if (currentNodeType.value == 'node') {
+      nodes.value[key] = {...nodeData.value}
+    } else {
+      edges.value[key] = {...nodeData.value}
+    }
+
+    displayEditorModal.value = false
+  }
+
+  const newGraph = () => {
+    graphName.value = 'New Graph'
+    nodes.value = {}
+    edges.value = {}
+    layouts.value = {nodes: {}}
+
+    statusMessage.value = 'New graph'
+
+  }
+
+  const saveGraph = () => {
+    hasError.value = false
+    statusMessage.value = 'Sending request'
+
+    let url = import.meta.env.VITE_API_BASE_URL + '/user-graphs';
+    console.log(url)
+
+    let postData = {
+      graph_name: graphName.value,
+      nodes: nodes.value,
+      edges: edges.value,
+      layouts: layouts.value
+    };
+
+    axios.post(url, postData).then(response =>{
+      console.log(response)
+      statusMessage.value = response.data
+      statusMessage.value = '[' + response.status + ' - ' + response.statusText + '] ' +
+                            response.data
+    }).catch(error =>{
+      hasError.value = true
+      console.log(error)
+      statusMessage.value = '[' + error.response.status + ' - ' + error.response.statusText + '] ' +
+                             error.response.data.detail
+    })
+  }
+
+  const loadGraph = () => {
+    hasError.value = false
+    statusMessage.value = 'Sending request'
+
+    let url = import.meta.env.VITE_API_BASE_URL + '/user-graphs/' + graphName.value;
+    console.log(url)
+
+
+
+    axios.get(url).then(response =>{
+      console.log(response)
+      nodes.value = response.data.nodes
+      edges.value = response.data.edges
+      layouts.value = response.data.layouts
+
+      statusMessage.value = '[' + response.status + ' - ' + response.statusText + '] Graph loaded'
+    }).catch(error =>{
+      hasError.value = true
+      console.log(error)
+      statusMessage.value = '[' + error.response.status + ' - ' + error.response.statusText + '] ' +
+                             error.response.data.detail
+    })
+  }
+
+  const openDetailWindow = () => {
+    if (isDetailWindowPresent())
+      return
+
+    let url = import.meta.env.VITE_WEBSITE_BASE_URL + '/detail'
+    detailWindow.value = window.open(url, "gde_detail")
+  }
 </script>
-
-<style>
-.graph {
-  border: 1px solid #c0c0c0;
-  height: 80vh;
-
-}
-</style>
-

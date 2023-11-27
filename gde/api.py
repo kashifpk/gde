@@ -1,0 +1,104 @@
+import logging
+
+from fastapi import Depends, Request, HTTPException, status
+from arango_orm import Database
+from arango_orm.exceptions import DocumentNotFoundError
+
+from . import API_BASE
+from .settings import get_settings
+
+from .utils.cbv import cbv
+from .utils.inferring_router import InferringRouter
+from .db import get_db
+from .db.models import GeneralGraph, UserGraph, Node, Link
+
+# from .schema import (
+#     NotificationResponse,
+#     NotificationRuleSchema,
+#     NotificationRuleResponse,
+#     NotificationCountResponse)
+
+from .schema import GraphSchema
+
+log = logging.getLogger(__name__)
+
+router = InferringRouter()
+API_PATH = API_BASE + "user-graphs"
+
+
+@cbv(router)
+class UserGraphAPI:
+    """Class based API for managing user graphs."""
+
+    request: Request
+
+    db: Database = Depends(get_db)
+
+
+    @router.get(API_PATH)
+    def list_user_graphs(self) -> list[dict]:
+        "List available user graphs"
+
+        return []
+
+    @router.get(API_PATH + "/{graph_key}")
+    def get_user_graph(self, graph_key: str) -> GraphSchema:
+        ug: UserGraph = self.db.query(UserGraph).by_key(graph_key)
+
+        node_recs: list[Node] = self.db.query(Node).filter_by(user_graph=ug._key).all()
+        nodes = {}
+        ignore_fields = {'key_', 'rev_', '_id', 'user_graph'}
+        for n_rec in node_recs:
+            n_dict = n_rec.model_dump(mode='json', by_alias=True, exclude=ignore_fields)
+            nodes[n_rec._key] = n_dict
+
+        link_recs: list[Link] = self.db.query(Link).filter_by(user_graph=ug._key).all()
+        edges = {}
+        for l_rec in link_recs:
+            e_dict = l_rec.model_dump(mode='json', by_alias=True, exclude=ignore_fields)
+            e_dict['source'] = e_dict['_from'].removeprefix(Node.__collection__ + '/')
+            e_dict['target'] = e_dict['_to'].removeprefix(Node.__collection__ + '/')
+            del e_dict['_from']
+            del e_dict['_to']
+
+            edges[l_rec._key] = e_dict
+
+        ret = GraphSchema(graph_name=ug.name, layouts=ug.layouts, nodes=nodes, edges=edges)
+
+        return ret
+
+    @router.post(API_PATH)
+    def save_graph(self, item: GraphSchema) -> str:
+
+        log.debug(item)
+        ug = self.db.query(UserGraph).filter_by(_key=item.graph_key).first()
+        # if ug is not None:
+        #     raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Already exists")
+
+        if ug:
+            ug.layouts = item.layouts
+            self.db.update(ug)
+            self.db.query(Node).filter_by(user_graph=ug._key).delete()
+            self.db.query(Link).filter_by(user_graph=ug._key).delete()
+            ret_msg = f"Graph '{ug._key}' updated"
+        else:
+            ug = UserGraph(_key=item.graph_key, name=item.graph_name, layouts=item.layouts)
+            self.db.add(ug)
+            ret_msg = f"Graph '{ug._key}' created"
+
+        for n_key, node in item.nodes.items():
+            node['_key'] = n_key
+            new_node = Node(user_graph=ug._key, **node)
+            self.db.add(new_node)
+
+        for e_key, edge in item.edges.items():
+            e_from = Node.__collection__ + '/' + edge['source']
+            e_to = Node.__collection__ + '/' + edge['target']
+
+            del edge['source']
+            del edge['target']
+
+            new_link = Link(_key=e_key, _from=e_from, _to=e_to, user_graph=ug._key, **edge)
+            self.db.add(new_link)
+
+        return ret_msg

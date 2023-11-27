@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 # import fastapi_vite
 
 from .settings import get_settings
+from .template_tags import js_asset, js_dev_asset
 # from .apps import get_apps
 # from .filters import custom_filters
 
@@ -25,8 +26,9 @@ loaders = [jinja2.FileSystemLoader(templates_path)]
 loader = jinja2.ChoiceLoader(loaders)
 
 templates = Jinja2Templates(directory=templates_path, loader=loader)
-# templates.env.globals['vite_hmr_client'] = fastapi_vite.vite_hmr_client
-# templates.env.globals['vite_asset'] = fastapi_vite.vite_asset
+templates.env.globals['js_asset'] = js_asset
+templates.env.globals['js_dev_asset'] = js_dev_asset
+
 
 # load custom filters
 # templates.env.filters.update(custom_filters)

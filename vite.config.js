@@ -28,15 +28,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve("./gde/js/main.js"),
-        vuehello: resolve("./gde/js/index.js"),
-        // auth: resolve("./src/sensorhub/auth/js/index.js"),
-        // dashboard: resolve("./src/sensorhub/dashboard/js/index.js"),
-        // admin: resolve("./src/sensorhub/admin/js/index.js"),
-        // devices: resolve("./src/sensorhub/devices/js/index.js"),
-        // tags: resolve("./src/sensorhub/tags/js/index.js"),
-        // notifications: resolve("./src/sensorhub/notifications/js/index.js"),
-        // partner: resolve("./src/sensorhub/partner/js/index.js"),
-        // alerts: resolve("./src/sensorhub/alerts/js/index.js")
+        gde: resolve("./gde/js/gde.js"),
       },
     },
     root: "."

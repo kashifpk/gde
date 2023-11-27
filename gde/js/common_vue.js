@@ -1,15 +1,18 @@
 import { createApp } from 'vue'
 
-import VNetworkGraph from "v-network-graph"
-import "v-network-graph/lib/style.css"
 
-function mountVueComponent(elementId, Component, withVNetworkGraph=false) {
-    const elem = document.getElementById(elementId)
-    const app = createApp(Component)
-    if (withVNetworkGraph) {
-        app.use(VNetworkGraph)
-    }
-    app.mount(elem)
+function mountVueComponent(elementId, Component) {
+  const elem = document.getElementById(elementId)
+  const app = createApp(Component)
+  // Register a global custom directive called `v-focus`
+  // app.directive('focus', {
+  //   // When the bound element is mounted into the DOM...
+  //   mounted(el) {
+  //   // Focus the element
+  //   el.focus()
+  //   }
+  // })
+  app.mount(elem)
 }
 
 export default mountVueComponent;

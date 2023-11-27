@@ -15,10 +15,20 @@ router = APIRouter()
 
 
 @router.get('/', response_class=HTMLResponse, include_in_schema=False)
-def index(request: Request):
+def main(request: Request):
     "Homepage"
 
     return templates.TemplateResponse(
-        'index.html',
+        'gde-main.html',
+        {"request": request}
+    )
+
+
+@router.get('/detail', response_class=HTMLResponse, include_in_schema=False)
+def detail(request: Request):
+    "Node/Edge detail page"
+
+    return templates.TemplateResponse(
+        'gde-detail.html',
         {"request": request}
     )

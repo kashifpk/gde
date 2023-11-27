@@ -11,7 +11,14 @@ class Settings(BaseSettings):
 
     app_name: str = "GDE"
     environment: str = Field(..., env="ENVIRONMENT")
-    # base_url: str = Field(..., env="WEBSITE_BASE_URL")
+    website_base_url: str = Field(..., env="WEBSITE_BASE_URL")
+    dev_js_server: str = Field("", env="DEV_JS_SERVER")
+    static_url: str = Field(..., env="STATIC_URL")
+
+    db_hosts: str = Field(..., env="DB_HOSTS")
+    db_username: str = Field(..., env="DB_USERNAME")
+    db_password: str = Field(..., env="DB_PASSWORD")
+    db_name: str = Field(..., env="DB_NAME")
 
     debug: bool = False
 
@@ -27,5 +34,5 @@ class Settings(BaseSettings):
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
     return Settings()

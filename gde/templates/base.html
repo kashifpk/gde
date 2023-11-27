@@ -7,7 +7,7 @@
     <!-- Style -->
     <link href="/static/fontawesome/css/all.min.css" rel="stylesheet" />
     <link href="/static/fonts/fonts.css" rel="stylesheet" />
-    <link href="/static/mdb.min.css" rel="stylesheet" />
+    <link href="/static/mdb.dark.min.css" rel="stylesheet" />
 
     <link rel="stylesheet" href="/static/style.css" />
 
@@ -17,13 +17,16 @@
 <body class="w-100 vh-100">
     {% block header %}{% endblock %}
 
-    <div class="content container h-100">
+    <div class="content container-fluid vh-100 p-4">
         {% block content %}{% endblock %}
     </div>
 
     <!-- scripts -->
     <!-- <script src="/static/mdb/js/mdb.es.min.js"></script> -->
     <!-- <script src="/static/nebra-sense.js"></script> -->
+
+    {{ js_asset('gde/js/gde.js') }}
+    {{ js_dev_asset('@vite/client') }}
 
     {% block footerscripts %}
     {% endblock %}

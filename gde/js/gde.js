@@ -3,5 +3,7 @@ import 'vite/modulepreload-polyfill'
 import mountVueComponent from './common_vue.js'
 
 import GDEMain from './GDEMain.vue'
+import GDEDetail from './GDEDetail.vue'
 
-mountVueComponent('vue-section', GDEMain, true);
+mountVueComponent('gde-main', GDEMain)
+mountVueComponent('gde-detail', GDEDetail)
