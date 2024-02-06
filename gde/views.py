@@ -32,3 +32,4 @@ def detail(request: Request):
         'gde-detail.html',
         {"request": request}
     )
+

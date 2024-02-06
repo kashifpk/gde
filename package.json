@@ -19,7 +19,7 @@
     "dotenv": "^16.3.1",
     "mdb-vue-ui-kit": "^4.1.1",
     "v-network-graph": "^0.9.10",
-    "vue": "^3.3.4",
+    "vue": "^3.4.2",
     "vue-codemirror": "^6.1.1"
   },
   "devDependencies": {

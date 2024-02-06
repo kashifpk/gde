@@ -1,7 +1,13 @@
 <style>
 .graph {
-  border: 1px solid #c0c0c0;
-  height: 92vh;
+  border: 1px solid #837f7f;
+  height: 89vh;
+
+}
+
+#graph-div {
+  width: 99%;
+  margin-top: 5vh;
 
 }
 
@@ -16,59 +22,81 @@
 .status {
   border-top: 2px solid #1b1b1b;
 }
+
 </style>
 
 <template>
+  <MDBNavbar dark bg="dark" position="top" container classContainer="justify-content-start">
+    <MDBNavbarBrand>
+      <MDBIcon icon="share-nodes" size="1x" />
+    </MDBNavbarBrand>
 
-  <MDBRow>
-    <MDBCol col="2">
-      <MDBRow class="mb-4">
-        <MDBCol col="3">
-          <MDBBtn outline="light" floating @click="newGraph()">
-            <MDBIcon icon="file"></MDBIcon>
-          </MDBBtn>
-        </MDBCol>
-        <MDBCol col="3">
-          <MDBBtn outline="info" floating @click="loadGraph()">
-            <MDBIcon icon="book-open"></MDBIcon>
-          </MDBBtn>
-        </MDBCol>
-        <MDBCol col="3">
-          <MDBBtn outline="success" floating @click="saveGraph()">
-            <MDBIcon icon="save"></MDBIcon>
-          </MDBBtn>
-        </MDBCol>
-      </MDBRow>
+    <MDBNavbarNav class="d-flex flex-row">
+      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
+        <MDBBtn outline="light" floating title="New graph" @click="newGraph()">
+          <MDBIcon icon="file"></MDBIcon>
+        </MDBBtn>
+      </MDBNavbarItem>
 
-      <MDBInput v-model="graphName" label="Graph name" class="mb-2" />
+      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
+        <MDBBtn outline="light" floating title="Load graph" @click="loadGraph()">
+          <MDBIcon icon="book-open"></MDBIcon>
+        </MDBBtn>
+      </MDBNavbarItem>
 
+      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
+        <MDBBtn outline="light" floating title="Save graph" @click="saveGraph()">
+          <MDBIcon icon="save"></MDBIcon>
+        </MDBBtn>
+      </MDBNavbarItem>
 
-      <MDBSwitch v-model="linkMode" label="Link mode" />
+      <MDBNavbarItem class="me-3 me-lg-0 ps-4">
+        <Field v-model="graphName" label="Graph" class="mb-2" no-separate-label />
+      </MDBNavbarItem>
 
-      <br />
-      <div class="add-edge-div">
-        <MDBInput label="new_link_from" v-model="newLinkFrom" /><br />
-        <MDBInput label="new_link_to" v-model="newLinkTo" /><br />
-        <MDBBtn color="primary" @click="addNewEdge()">Add Link</MDBBtn>
+      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
+        <MDBBtn outline="light" floating title="Open node/edge detail view window" @click="openDetailWindow()">
+          <MDBIcon icon="fas fa-external-link-alt"></MDBIcon>
+        </MDBBtn>
+      </MDBNavbarItem>
 
-      </div>
-      <MDBBtn color="info" @click="openDetailWindow()">Open Detail Window</MDBBtn>
-    </MDBCol>
-    <MDBCol>
-      <div ref="graphDiv">
-        <v-network-graph ref="graph" class="graph"
-        :nodes="nodes" :edges="edges" :layouts="layouts"
-        :configs="config" :event-handlers="eventHandlers">
+    </MDBNavbarNav>
 
-          <template #edge-label="{ edge, ...slotProps }">
-            <v-edge-label :text="edge.label" align="center" fill="#ffe7dc" vertical-align="above" v-bind="slotProps" />
-          </template>
-        </v-network-graph>
+    <MDBSwitch v-model="linkMode" label="Link mode" />
 
-      </div>
+    <form class="d-flex input-group w-auto ps-4">
+      <MDBInput
+      class="d-flex w-auto ps-4 border border-end-0"
+      inputGroup
+      :formOutline="false"
+      v-model="input22"
+      aria-label="Dollar amount (with dot and two decimal places)"
+    >
+      <span class="input-group-text border border-start-0" ><MDBIcon icon="search" ></MDBIcon></span>
 
-    </MDBCol>
-  </MDBRow>
+    </MDBInput>
+      <!-- <input
+        type="search"
+        class="form-control"
+        placeholder="Type query"
+        aria-label="Search"
+      />
+      <MDBBtn outline="light"> Search </MDBBtn> -->
+    </form>
+  </MDBNavbar>
+
+  <ConfigurationPanel />
+  <div id="graph-div" ref="graphDiv">
+    <v-network-graph ref="graph" class="graph"
+    :nodes="nodes" :edges="edges" :layouts="layouts"
+    :configs="config" :event-handlers="eventHandlers">
+
+      <template #edge-label="{ edge, ...slotProps }">
+        <v-edge-label :text="edge._meta.label" align="center" fill="#ffe7dc" vertical-align="above" v-bind="slotProps" />
+      </template>
+    </v-network-graph>
+
+  </div>
 
   <MDBModal
     id="nodeEditor"
@@ -82,9 +110,10 @@
                 @cancel="displayEditorModal=false" @save="nodeEditorUpdated()" />
   </MDBModal>
 
-  <MDBRow class="status" :class="{ 'text-danger': hasError }">
-    <MDBCol class="h-100 text-center">{{ statusMessage }}</MDBCol>
-  </MDBRow>
+
+  <div class="text-center status" :class="{ 'text-danger': hasError }" style="height: 2vh;">
+    {{ statusMessage }}
+  </div>
 
 </template>
 
@@ -98,12 +127,16 @@
   import { useActiveElement, useMagicKeys, whenever } from '@vueuse/core'
   import { logicAnd } from '@vueuse/math'
 
-  import {onMounted, computed, ref, reactive, nextTick} from "vue";
-  import { MDBRow, MDBCol,
-          MDBModal,
+  import {onMounted, computed, ref} from "vue";
+  import { MDBRow, MDBCol, MDBTooltip,
+          MDBModal, MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavbarItem,
           MDBBtn, MDBInput, MDBSwitch, MDBIcon} from "mdb-vue-ui-kit";
 
+  import Field from "./components/Field.vue";
   import NodeEditor from "./components/NodeEditor.vue";
+  import ConfigurationPanel from "./components/ConfigurationPanel.vue";
+
+  import { getNodeDisplay } from './graph_nodes_utils.js'
 
   const statusMessage = ref("Status")
   const hasError = ref(false)
@@ -113,6 +146,7 @@
   const graphName = ref("untitled")
   const graph = ref()
   const graphDiv = ref(null)
+
   const detailWindow = ref(null)
 
   const editorMode = ref("")
@@ -174,8 +208,14 @@
     node: {
       label: {
         directionAutoAdjustment: true,
-        text: "label",
-        color: "#c077d5"
+        text: node => node._meta.label,
+        color: "yellow"
+      },
+      normal: {
+        type: "circle",
+        color: (node) => {
+          return getNodeDisplay(node)
+        }
       }
     },
     edge: {
@@ -248,7 +288,7 @@
       nodeData.value._key = graphName.value + '-'
       nodeData.value.label = null
       nodeData.value.extraInfo = {}
-
+      nodeData.value._meta = {}
     }
   }
 
@@ -270,6 +310,7 @@
     displayEditorModal.value = false
 
     console.log("New node's data", nodeData.value)
+
     nodes.value[nodeData.value._key] = JSON.parse(JSON.stringify(nodeData.value))  // deep copy
     layouts.value.nodes[nodeData.value._key] = {x: newNodePosition.x, y: newNodePosition.y}
   }
@@ -362,4 +403,5 @@
     let url = import.meta.env.VITE_WEBSITE_BASE_URL + '/detail'
     detailWindow.value = window.open(url, "gde_detail")
   }
+
 </script>

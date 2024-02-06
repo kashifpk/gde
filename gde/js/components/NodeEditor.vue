@@ -4,30 +4,9 @@
   </MDBModalHeader>
 
   <MDBModalBody>
+    <DataEditor :fields="editorFields" v-model="fieldsData" initial-mode="edit" />
+    <hr />
     <form>
-      <template v-if="mode=='update'">
-        <MDBRow>
-          <MDBCol col="3">Key</MDBCol>
-          <MDBCol col="9">{{ modelValue._key }}</MDBCol>
-        </MDBRow>
-        <MDBRow v-if="nodeType=='edge'">
-          <MDBCol col="3">Source</MDBCol>
-          <MDBCol col="9">{{ modelValue.source }}</MDBCol>
-        </MDBRow>
-        <MDBRow v-if="nodeType=='edge'">
-          <MDBCol col="3">Target</MDBCol>
-          <MDBCol col="9">{{ modelValue.target }}</MDBCol>
-        </MDBRow>
-      </template>
-      <template v-else>
-        <MDBInput ref="nodeKeyTextBox" label="Key" v-model="modelValue._key" class="mb-4" />
-        <MDBInput v-if="nodeType=='edge'" label="Source" v-model="modelValue.source" class="mb-4" />
-        <MDBInput v-if="nodeType=='edge'" label="Target" v-model="modelValue.target" class="mb-4" />
-      </template>
-
-      <MDBInput label="Node Label" v-model="modelValue.label" class="mb-4" />
-
-      <!-- <MDBTextarea label="Extra Info (JSON)" rows="4" v-model="modelValue.extraInfo" class="mb-4" /> -->
       <label for="extra-info">Extra info</label>
       <Codemirror id="extra-info"
         v-model="extraInfo"
@@ -53,6 +32,8 @@ import { json } from "@codemirror/lang-json"
 import { python } from "@codemirror/lang-python"
 import { oneDark } from "@codemirror/theme-one-dark"
 
+import DataEditor from "./DataEditor.vue"
+
 const props = defineProps({
   modelValue: {
     type: Object
@@ -71,25 +52,45 @@ const emit = defineEmits(['update:modelValue', 'cancel', 'save'])
 
 const codemirrorExtensions = [json(), python(), oneDark]
 
-const nodeKeyTextBox = ref()
+// const nodeKeyTextBox = ref()
 const extraInfo = ref("")
+const fieldsData = ref({})
+const editorFields = ref([
+  {name: '_key', label: "Key", required: true},
+  {name: 'node_type', label: 'Type', choices: ["person", "event"]},
+  {name: 'label', label: "Node Label"},
+  {name: 'name', value: 'Anonymous'}
+])
 
 onMounted(async () => {
-  if(props.mode == 'new') {
-    await nextTick()
-    // console.log(nodeKeyTextBox.value)
-    nodeKeyTextBox.value.inputRef.focus()
+  fieldsData.value = {...props.modelValue}
+  if (props.nodeType == 'edge') {
+    editorFields.value.splice(1, 0, {name: 'source', label: "Source", value: props.modelValue['source'], required: true});
+    editorFields.value.splice(2, 0, {name: 'target', label: "Target", value: props.modelValue['target'], required: true});
   }
-
   extraInfo.value = JSON.stringify(props.modelValue.extraInfo, null, 2)
+  console.log("model value:", props.modelValue)
+  console.log(fieldsData.value._meta.label)
+  fieldsData.value.label = fieldsData.value._meta.label
+  fieldsData.value.node_type = fieldsData.value._meta.node_type
 })
 
 const save = () => {
-  console.log(extraInfo.value)
   if (extraInfo.value) {
-    props.modelValue.extraInfo = JSON.parse(extraInfo.value)
+    console.log("have extra info")
+    fieldsData.value.extraInfo = JSON.parse(extraInfo.value)
   }
-  emit('update:modelValue', props.modelValue)
+  console.log("fieldsData on save", fieldsData.value)
+  const meta = {
+    label: fieldsData.value.label,
+    node_type: fieldsData.value.node_type
+  }
+
+  fieldsData.value._meta = {...meta}
+  delete fieldsData.value.label
+  delete fieldsData.value.node_type
+  console.log(fieldsData.value)
+  emit('update:modelValue', fieldsData.value)
   emit('save')
 }
 

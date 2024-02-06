@@ -9,6 +9,7 @@ from .settings import get_settings
 
 from .utils.cbv import cbv
 from .utils.inferring_router import InferringRouter
+from .utils.node_manager import NodeManager
 from .db import get_db
 from .db.models import GeneralGraph, UserGraph, Node, Link
 
@@ -44,24 +45,18 @@ class UserGraphAPI:
     @router.get(API_PATH + "/{graph_key}")
     def get_user_graph(self, graph_key: str) -> GraphSchema:
         ug: UserGraph = self.db.query(UserGraph).by_key(graph_key)
+        node_manager = NodeManager(self.db)
 
         node_recs: list[Node] = self.db.query(Node).filter_by(user_graph=ug._key).all()
         nodes = {}
-        ignore_fields = {'key_', 'rev_', '_id', 'user_graph'}
+
         for n_rec in node_recs:
-            n_dict = n_rec.model_dump(mode='json', by_alias=True, exclude=ignore_fields)
-            nodes[n_rec._key] = n_dict
+            nodes[n_rec._key] = node_manager.post_process(n_rec)
 
         link_recs: list[Link] = self.db.query(Link).filter_by(user_graph=ug._key).all()
         edges = {}
         for l_rec in link_recs:
-            e_dict = l_rec.model_dump(mode='json', by_alias=True, exclude=ignore_fields)
-            e_dict['source'] = e_dict['_from'].removeprefix(Node.__collection__ + '/')
-            e_dict['target'] = e_dict['_to'].removeprefix(Node.__collection__ + '/')
-            del e_dict['_from']
-            del e_dict['_to']
-
-            edges[l_rec._key] = e_dict
+            edges[l_rec._key] = node_manager.post_process(l_rec)
 
         ret = GraphSchema(graph_name=ug.name, layouts=ug.layouts, nodes=nodes, edges=edges)
 
@@ -90,6 +85,7 @@ class UserGraphAPI:
             node['_key'] = n_key
             new_node = Node(user_graph=ug._key, **node)
             self.db.add(new_node)
+            log.debug(f"New node: {new_node}")
 
         for e_key, edge in item.edges.items():
             e_from = Node.__collection__ + '/' + edge['source']
@@ -100,5 +96,6 @@ class UserGraphAPI:
 
             new_link = Link(_key=e_key, _from=e_from, _to=e_to, user_graph=ug._key, **edge)
             self.db.add(new_link)
+            log.debug(f"New link: {new_link}")
 
         return ret_msg

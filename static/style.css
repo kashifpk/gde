@@ -1,3 +1,38 @@
 body {
   font-family: Roboto, Helvetica, Arial, sans-serif;
 }
+
+.content {
+  background-color: rgb(38, 34, 34);
+}
+
+.gde-field {
+  position: relative;
+  padding: 5px 10px;
+}
+input, select {
+  background-color: rgb(57, 57, 57);
+  padding: 3px 10px;
+  box-sizing: border-box;
+  border: 2px solid rgb(108, 108, 108);
+  border-radius: 5px;
+  outline-style: none;
+  color:rgb(255, 255, 255)
+}
+
+.input-with-label {
+  width: 80%;
+}
+
+.input-without-label {
+  width: 100%;
+}
+
+input[type=text]:focus {
+  border: 2px solid #787878;
+  background-color: rgb(42, 42, 42);
+}
+
+input[type=checkbox] {
+  width: 1.5em; height: 1.5em; padding-left: 3px;
+}

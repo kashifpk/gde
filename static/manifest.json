@@ -1,18 +1,18 @@
 {
-  "gde/js/index.css": {
-    "file": "index-707ebf53.css",
-    "src": "gde/js/index.css"
+  "gde/js/gde.css": {
+    "file": "gde-1d3f27c4.css",
+    "src": "gde/js/gde.css"
   },
-  "gde/js/index.js": {
+  "gde/js/gde.js": {
     "css": [
-      "index-707ebf53.css"
+      "gde-1d3f27c4.css"
     ],
-    "file": "vuehello-614a4ce2.js",
+    "file": "gde-e64f52fe.js",
     "imports": [
       "gde/js/main.js"
     ],
     "isEntry": true,
-    "src": "gde/js/index.js"
+    "src": "gde/js/gde.js"
   },
   "gde/js/main.js": {
     "file": "main-3cfb730f.js",
