@@ -9,7 +9,7 @@ from starlette.middleware.cors import CORSMiddleware
 # from starlette.middleware.sessions import SessionMiddleware
 
 from .views import router as root_router
-from .api import router as api_router
+from .api import router as api_router, node_type_api_router
 from .settings import get_settings
 from .logging import configure_logging
 from .app_init import app_init, app_cleanup
@@ -55,4 +55,5 @@ app.add_middleware(
 
 app.include_router(root_router)
 app.include_router(api_router)
+app.include_router(node_type_api_router)
 # include_app_routers(app)

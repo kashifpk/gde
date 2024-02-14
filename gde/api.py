@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import Depends, Request, HTTPException, status
+from fastapi_views import ViewRouter
 from arango_orm import Database
 from arango_orm.exceptions import DocumentNotFoundError
 
@@ -9,9 +10,10 @@ from .settings import get_settings
 
 from .utils.cbv import cbv
 from .utils.inferring_router import InferringRouter
+from .utils.crud import CRUDAPIBase
 from .utils.node_manager import NodeManager
 from .db import get_db
-from .db.models import GeneralGraph, UserGraph, Node, Link
+from .db.models import GeneralGraph, UserGraph, Node, Link, NodeType
 
 # from .schema import (
 #     NotificationResponse,
@@ -94,8 +96,22 @@ class UserGraphAPI:
             del edge['source']
             del edge['target']
 
+            if '_key' in edge:
+                del edge['_key']
+
             new_link = Link(_key=e_key, _from=e_from, _to=e_to, user_graph=ug._key, **edge)
             self.db.add(new_link)
             log.debug(f"New link: {new_link}")
 
         return ret_msg
+
+
+class NodeTypesAPI(CRUDAPIBase):
+
+    response_schema = NodeType
+    MODEL = NodeType
+    log = logging.getLogger('NodeTypesAPI')
+
+
+node_type_api_router = ViewRouter(prefix="/api/node-types")
+node_type_api_router.register_view(NodeTypesAPI)

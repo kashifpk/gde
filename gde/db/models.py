@@ -29,10 +29,10 @@ class Setting(Collection):
 class FieldSpecification(BaseModel):
 
     name: str
-    label: str | None
+    label: str | None = None
     data_type: str
-    content_type: str | None  # mime type style
-    required: bool | None
+    content_type: str | None = None # mime type style
+    required: bool | None = None
 
 
 class NodeType(Collection):
@@ -52,7 +52,8 @@ class NodeType(Collection):
     key_: str = Field(..., alias="_key")   # Node type name/key
 
     label_field: str | None = None
-    default_display: str = 'color:#ff0000'
+    default_display_type: str | None = None
+    default_display_value: str | None = None
     display_fields_priority: list[str] = ['photo', 'icon', 'color']
     is_edge: bool = False
     fields: list[FieldSpecification]

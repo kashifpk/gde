@@ -92,7 +92,7 @@
     :configs="config" :event-handlers="eventHandlers">
 
       <template #edge-label="{ edge, ...slotProps }">
-        <v-edge-label :text="edge._meta.label" align="center" fill="#ffe7dc" vertical-align="above" v-bind="slotProps" />
+        <v-edge-label :text="edge._meta.label" align="center" fill="#ff00dc" vertical-align="above" v-bind="slotProps" />
       </template>
     </v-network-graph>
 

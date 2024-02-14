@@ -13,7 +13,7 @@
         :style="{height: '400px'}"
         :extensions="codemirrorExtensions"
       />
-  </form>
+    </form>
   </MDBModalBody>
   <MDBModalFooter>
     <MDBBtn color="secondary" @click="$emit('cancel')">Cancel</MDBBtn>
@@ -24,6 +24,7 @@
 
 <script setup>
 
+import axios from "axios"
 import { onMounted, computed, ref, reactive, watch, nextTick} from "vue"
 import { MDBModal, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter,
          MDBInput, MDBTextarea, MDBBtn, MDBCol, MDBRow } from "mdb-vue-ui-kit"
@@ -55,12 +56,11 @@ const codemirrorExtensions = [json(), python(), oneDark]
 // const nodeKeyTextBox = ref()
 const extraInfo = ref("")
 const fieldsData = ref({})
-const editorFields = ref([
-  {name: '_key', label: "Key", required: true},
-  {name: 'node_type', label: 'Type', choices: ["person", "event"]},
-  {name: 'label', label: "Node Label"},
-  {name: 'name', value: 'Anonymous'}
-])
+const nodeTypes = ref({})
+const nodeTypeNames = ref([])
+const editorFields = ref([])
+const haveLabel = ref(false)
+
 
 onMounted(async () => {
   fieldsData.value = {...props.modelValue}
@@ -70,10 +70,75 @@ onMounted(async () => {
   }
   extraInfo.value = JSON.stringify(props.modelValue.extraInfo, null, 2)
   console.log("model value:", props.modelValue)
-  console.log(fieldsData.value._meta.label)
-  fieldsData.value.label = fieldsData.value._meta.label
-  fieldsData.value.node_type = fieldsData.value._meta.node_type
+
+  await getNodeTypes()
+  updateFieldsData()
+  buildEditorFields()
+
 })
+
+watch(
+  fieldsData,
+  () => {
+
+    updateEditorFields()
+  },
+  { deep: true }
+)
+
+async function getNodeTypes() {
+  let url = import.meta.env.VITE_API_BASE_URL + '/node-types'
+  const response = await axios.get(url)
+  // on error log message
+  if (response.status !== 200) {
+    console.log("error:", response.statusText, response)
+  }
+
+  //nodeTypes.value = response.data
+  // iterate response.data array using for-of loop
+  for (const nodeType of response.data) {
+    nodeTypeNames.value.push(nodeType._key)
+    nodeTypes.value[nodeType._key] = nodeType
+  }
+}
+
+const updateFieldsData = () => {
+  fieldsData.value.label = fieldsData.value._meta.label == undefined ? "" : fieldsData.value._meta.label
+  fieldsData.value.node_type = fieldsData.value._meta.node_type == undefined ? "" : fieldsData.value._meta.node_type
+}
+
+const buildEditorFields = () => {
+  console.log("buildEditorFields", editorFields.value)
+  editorFields.value.push({name: '_key', label: "Key", required: true})
+  editorFields.value.push({name: 'node_type', label: 'Type', choices: nodeTypeNames.value})
+  updateEditorFields()
+}
+
+const updateEditorFields = () => {
+  // update editor fields when node type is changed adding/removing fields for that node.
+  console.log("updateEditorFields", fieldsData.value, editorFields.value)
+  if(fieldsData.value.node_type == "" && haveLabel.value == false) {
+    fieldsData.value.label = ""
+    editorFields.value.push({name: 'label', label: "Node Label"})
+    haveLabel.value = true
+  }
+
+  if(fieldsData.value.node_type != "" && haveLabel.value == true) {
+    // find object in editosFields.value array and remove it
+    const index = editorFields.value.findIndex(obj => obj.name === 'label')
+    // remove element in editorFields.value array at index
+    editorFields.value.splice(index, 1)
+
+    delete fieldsData.value.label
+    haveLabel.value = false
+
+    // add fields from nodeTypes.value.fields for the current selected node into editorFields
+    nodeTypes.value[fieldsData.value.node_type].fields.forEach(field => {
+      editorFields.value.push(field)
+    })
+  }
+
+}
 
 const save = () => {
   if (extraInfo.value) {
