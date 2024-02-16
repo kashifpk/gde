@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/graph.png">
+  <!-- Style -->
+  <link href="/static/fontawesome/css/all.min.css" rel="stylesheet" />
+  <link href="/static/fonts/fonts.css" rel="stylesheet" />
+  <link href="/static/mdb.dark.min.css" rel="stylesheet" />
 
-    <!-- Style -->
-    <link href="/static/fontawesome/css/all.min.css" rel="stylesheet" />
-    <link href="/static/fonts/fonts.css" rel="stylesheet" />
-    <link href="/static/mdb.dark.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
 
-    <link rel="stylesheet" href="/static/style.css" />
-
-    <title>Graph Data Explorer - {% block title %}{% endblock %}</title>
-    {% block extra_head %}{% endblock %}
+  <title>Graph Data Explorer - {% block title %}{% endblock %}</title>
+  {% block extra_head %}{% endblock %}
 </head>
 <body class="w-100 vh-100">
-    {% block header %}{% endblock %}
+  {% block header %}{% endblock %}
 
-    <div class="content container-fluid vh-100 p-4">
-        {% block content %}{% endblock %}
-    </div>
+  <div class="content container-fluid vh-100 p-4">
+      {% block content %}{% endblock %}
+  </div>
 
-    <!-- scripts -->
-    <!-- <script src="/static/mdb/js/mdb.es.min.js"></script> -->
-    <!-- <script src="/static/nebra-sense.js"></script> -->
+  <!-- scripts -->
+  <!-- <script src="/static/mdb/js/mdb.es.min.js"></script> -->
+  <!-- <script src="/static/nebra-sense.js"></script> -->
 
-    {{ js_asset('gde/js/gde.js') }}
-    {{ js_dev_asset('@vite/client') }}
+  {{ js_asset('gde/js/gde.js') }}
+  {{ js_dev_asset('@vite/client') }}
 
-    {% block footerscripts %}
-    {% endblock %}
+  {% block footerscripts %}
+  {% endblock %}
 </body>
 </html>

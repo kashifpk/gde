@@ -10,10 +10,24 @@
 - [x] Generic CRUD API for arango models
   - [x] Node types api and use it
 - [x] Fields addition to add node/edge when selecting a node type
-- [ ] Icon support for nodes
-- [ ] Line color support for edges
+- [x] Test standalone v-network-graph to see if icon and images work and it's an issue with my code.
+  - [x] Test using a test view.
+
+- [x] Icon support for nodes
+- [x] Image support for nodes
+- [x] Line color support for edges
+- [ ] Node details page (separate window) should show more node details and configurable "n" linkages
 - [ ] When updating nodes/edges don't set derived/calculated fields. Like label if it's not present and is fetched from node_type etc then on update it should not be set as a value on the node unless the user actually sets it.
 - [ ] Bug: Newly created edges are not editable (error says missing _meta field) until they are saved and loaded back from DB.
-- [ ] Node details page (separate window) should show more node details and configurable "n" linkages
+- [ ] Start implementing RCO graph.
 - [ ] Bug: Node meta doesn't take affect for newly created/edited nodes. Only works when loaded from DB.
 - [ ] Node types management interface
+- [ ] Export graph as SVG
+- [ ] Export and Import Graph (dumps and loads as JSON)
+- [ ] Ability to use external sources (databases) for graph data.
+  - [ ] Layout and display config stays in GDE database but actual data is fetched from external data source.
+  - [ ] Initially can support arango and relational (PostgreSQL, etc) data sources.
+  - [ ] Will probably need to implement database adapters for fetching data
+    - [ ] Get linked data
+    - [ ] Ability to expand a record (fetch linked records)
+- [ ] Typescript support

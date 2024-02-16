@@ -33,3 +33,12 @@ def detail(request: Request):
         {"request": request}
     )
 
+
+@router.get('/test', response_class=HTMLResponse, include_in_schema=False)
+def test_page(request: Request):
+    "Test page for experimentation"
+
+    return templates.TemplateResponse(
+        'test.html',
+        {"request": request}
+    )
