@@ -16,7 +16,14 @@
 - [x] Icon support for nodes
 - [x] Image support for nodes
 - [x] Line color support for edges
-- [ ] Node details page (separate window) should show more node details and configurable "n" linkages
+- [x] Save extra info as `extra_info` instead of `extraInfo` in the db and update code accordingly.
+- [x] Node details page (separate window) should show more node details
+  - [x] Item query API
+  - [x] Detail page can work with node key too instead of just inter-window communication
+  - [ ] and configurable "n" linkages ( by default expand by 1 - immediate links)
+- [x] Node data display reusable component for GDEDetail and other places.
+  - [ ] Option to display links
+  - [ ] Link direction indicator
 - [ ] When updating nodes/edges don't set derived/calculated fields. Like label if it's not present and is fetched from node_type etc then on update it should not be set as a value on the node unless the user actually sets it.
 - [ ] Bug: Newly created edges are not editable (error says missing _meta field) until they are saved and loaded back from DB.
 - [ ] Start implementing RCO graph.
@@ -30,4 +37,5 @@
   - [ ] Will probably need to implement database adapters for fetching data
     - [ ] Get linked data
     - [ ] Ability to expand a record (fetch linked records)
-- [ ] Typescript support
+- [x] Typescript support
+- [ ] Content type display components (image, location/map, event, etc)

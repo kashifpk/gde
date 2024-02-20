@@ -1,5 +1,6 @@
 """Views that render non-json responses. Usually HTML responses are returned."""
 
+from typing import Optional
 import importlib.metadata
 from fastapi import Depends, Request, APIRouter
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -30,8 +31,21 @@ def detail(request: Request):
 
     return templates.TemplateResponse(
         'gde-detail.html',
-        {"request": request}
+        {"request": request, "item_key": ""}
     )
+
+@router.get('/detail/{item_key}', response_class=HTMLResponse, include_in_schema=False)
+def detail_with_item(request: Request, item_key: str ):
+    "Node/Edge detail page"
+
+    return templates.TemplateResponse(
+        'gde-detail.html',
+        {"request": request, "item_key": item_key}
+    )
+
+
+
+
 
 
 @router.get('/test', response_class=HTMLResponse, include_in_schema=False)

@@ -366,7 +366,7 @@ const eventHandlers = {
     displayEditorModal.value = true
     nodeData.value._key = graphName.value + '-'
     nodeData.value.label = null
-    nodeData.value.extraInfo = {}
+    nodeData.value.extra_info = {}
     nodeData.value._meta = {}
   }
 }

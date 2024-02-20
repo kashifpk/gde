@@ -9,7 +9,7 @@
     <form>
       <label for="extra-info">Extra info</label>
       <Codemirror id="extra-info"
-        v-model="extraInfo"
+        v-model="extra_info"
         :style="{height: '400px'}"
         :extensions="codemirrorExtensions"
       />
@@ -54,7 +54,7 @@ const emit = defineEmits(['update:modelValue', 'cancel', 'save'])
 const codemirrorExtensions = [json(), python(), oneDark]
 
 // const nodeKeyTextBox = ref()
-const extraInfo = ref("")
+const extra_info = ref("")
 const fieldsData = ref({})
 const nodeTypes = ref({})
 const nodeTypeNames = ref([])
@@ -68,7 +68,7 @@ onMounted(async () => {
     editorFields.value.splice(1, 0, {name: 'source', label: "Source", value: props.modelValue['source'], required: true});
     editorFields.value.splice(2, 0, {name: 'target', label: "Target", value: props.modelValue['target'], required: true});
   }
-  extraInfo.value = JSON.stringify(props.modelValue.extraInfo, null, 2)
+  extra_info.value = JSON.stringify(props.modelValue.extra_info, null, 2)
   console.log("model value:", props.modelValue)
 
   await getNodeTypes()
@@ -141,9 +141,9 @@ const updateEditorFields = () => {
 }
 
 const save = () => {
-  if (extraInfo.value) {
+  if (extra_info.value) {
     console.log("have extra info")
-    fieldsData.value.extraInfo = JSON.parse(extraInfo.value)
+    fieldsData.value.extra_info = JSON.parse(extra_info.value)
   }
   console.log("fieldsData on save", fieldsData.value)
   const meta = {
