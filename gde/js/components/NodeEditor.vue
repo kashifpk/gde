@@ -33,6 +33,7 @@ import { json } from "@codemirror/lang-json"
 import { python } from "@codemirror/lang-python"
 import { oneDark } from "@codemirror/theme-one-dark"
 
+import { useStore } from '../store.ts'
 import DataEditor from "./DataEditor.vue"
 
 const props = defineProps({
@@ -54,6 +55,7 @@ const emit = defineEmits(['update:modelValue', 'cancel', 'save'])
 const codemirrorExtensions = [json(), python(), oneDark]
 
 // const nodeKeyTextBox = ref()
+const store = useStore()
 const extra_info = ref("")
 const fieldsData = ref({})
 const nodeTypes = ref({})
@@ -71,7 +73,8 @@ onMounted(async () => {
   extra_info.value = JSON.stringify(props.modelValue.extra_info, null, 2)
   console.log("model value:", props.modelValue)
 
-  await getNodeTypes()
+  nodeTypes.value = store.nodeTypes
+  nodeTypeNames.value = Object.keys(nodeTypes.value)
   updateFieldsData()
   buildEditorFields()
 
@@ -85,22 +88,6 @@ watch(
   },
   { deep: true }
 )
-
-async function getNodeTypes() {
-  let url = import.meta.env.VITE_API_BASE_URL + '/node-types'
-  const response = await axios.get(url)
-  // on error log message
-  if (response.status !== 200) {
-    console.log("error:", response.statusText, response)
-  }
-
-  //nodeTypes.value = response.data
-  // iterate response.data array using for-of loop
-  for (const nodeType of response.data) {
-    nodeTypeNames.value.push(nodeType._key)
-    nodeTypes.value[nodeType._key] = nodeType
-  }
-}
 
 const updateFieldsData = () => {
   fieldsData.value.label = fieldsData.value._meta.label == undefined ? "" : fieldsData.value._meta.label

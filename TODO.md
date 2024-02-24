@@ -22,14 +22,20 @@
   - [x] Detail page can work with node key too instead of just inter-window communication
   - [ ] and configurable "n" linkages ( by default expand by 1 - immediate links)
 - [x] Node data display reusable component for GDEDetail and other places.
-  - [ ] Option to display links
-  - [ ] Link direction indicator
+  - [x] Option to display links
+  - [x] Link direction indicator and textual description (bajwa initiated rco)
+  - [ ] Option to "expand" (get links and display them)
+- [x] State management via Pinia and use it for storing node types information.
 - [ ] When updating nodes/edges don't set derived/calculated fields. Like label if it's not present and is fetched from node_type etc then on update it should not be set as a value on the node unless the user actually sets it.
+- [x] Bug: Nodes without any node type don't have a fill color in graph display.
 - [ ] Bug: Newly created edges are not editable (error says missing _meta field) until they are saved and loaded back from DB.
+- [ ] Bug: Newly created nodes don't show node key as label if no node label was provided.
+- [ ] Bug: Newly created nodes don't display node color according to type (because that is fetched from the DB and theses nodes have not yet been saved).
+- [ ] Bug: Editing a node only displays key, type and extra info. No other field is displayed.
 - [ ] Start implementing RCO graph.
 - [ ] Bug: Node meta doesn't take affect for newly created/edited nodes. Only works when loaded from DB.
 - [ ] Node types management interface
-- [ ] Export graph as SVG
+- [x] Export graph as SVG
 - [ ] Export and Import Graph (dumps and loads as JSON)
 - [ ] Ability to use external sources (databases) for graph data.
   - [ ] Layout and display config stays in GDE database but actual data is fetched from external data source.

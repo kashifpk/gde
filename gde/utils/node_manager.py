@@ -63,10 +63,11 @@ class NodeManager:
             n_dict["_links"] = []
             for k, links in node._relations.items():
                 for link in links:
+
                     ls_d = dict(
                         _key=link._key,
-                        _from=link._from,
-                        _to=link._to,
+                        source=link._from.split('/')[-1],
+                        target=link._to.split('/')[-1],
                         _meta=link.model_dump()['_meta'],
                         linked_node=NodeResponseSchema(
                             **link._next.model_dump(

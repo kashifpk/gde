@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, field_validator, computed_field, ConfigDict, Field
+from pydantic import BaseModel, computed_field, ConfigDict, Field
 from slugify import slugify
 
 
@@ -42,7 +42,7 @@ class NodeResponseSchema(BaseModel):
 
 class LinkSchema(BaseModel):
     key_: str = Field(..., alias="_key")
-    from_: str = Field(..., alias="_from")
-    to_: str = Field(..., alias="_to")
+    source: str
+    target: str
     meta_: NodeMetaInformation = Field(..., alias="_meta")
     linked_node: NodeResponseSchema

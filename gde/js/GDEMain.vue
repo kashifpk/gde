@@ -71,6 +71,12 @@ by the background circle. */
         </MDBBtn>
       </MDBNavbarItem>
 
+      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
+        <MDBBtn outline="light" floating title="Save as SVG" @click="saveSVG">
+          <MDBIcon icon="fas fa-download"></MDBIcon>
+        </MDBBtn>
+      </MDBNavbarItem>
+
     </MDBNavbarNav>
 
     <MDBSwitch v-model="linkMode" label="Link mode" />
@@ -124,7 +130,7 @@ by the background circle. */
         <!-- circle for filling background -->
         <circle
           :r="config.radius * scale"
-          :fill="nodes[nodeId]._meta.display_type=='color' ? nodes[nodeId]._meta.display_value : '#1b1b1b'"
+          :fill="getNodeColor(nodes[nodeId])"
           v-bind="slotProps"
         />
 
@@ -205,12 +211,14 @@ import {
   MDBBtn, MDBInput, MDBSwitch, MDBIcon
 } from "mdb-vue-ui-kit";
 
+import { useStore } from "./store.ts";
 import Field from "./components/Field.vue";
 import NodeEditor from "./components/NodeEditor.vue";
 import ConfigurationPanel from "./components/ConfigurationPanel.vue";
 
-import { getNodeDisplay } from './graph_nodes_utils.js'
+import { getNodeColor, getEdgeColor, getNodeTypes } from './graph_nodes_utils.ts'
 
+const store = useStore()
 const search = ref("")
 const statusMessage = ref("Status")
 const hasError = ref(false)
@@ -227,7 +235,6 @@ const editorMode = ref("")
 const currentNodeType = ref("")
 
 const newNodePosition = { x: 10, y: 10 }
-
 const nodeData = ref({})
 const linkMode = ref(false)
 const newLinkFrom = ref("")
@@ -284,18 +291,12 @@ const config = ref({
       directionAutoAdjustment: true,
       text: node => node._meta.label,
       color: "yellow"
-    },
-    normal: {
-      type: "circle",
-      color: (node) => {
-        return getNodeDisplay(node)
-      }
     }
   },
   edge: {
     normal: {
       color: (node) => {
-        return getNodeDisplay(node)
+        return getEdgeColor(node)
       }
     },
     marker: {
@@ -372,7 +373,7 @@ const eventHandlers = {
 }
 
 onMounted(async () => {
-
+  await store.loadNodeTypes()
 });
 
 const nodeEditorUpdated = () => {
@@ -481,6 +482,17 @@ const openDetailWindow = () => {
 
   let url = import.meta.env.VITE_WEBSITE_BASE_URL + '/detail'
   detailWindow.value = window.open(url, "gde_detail")
+}
+
+const saveSVG = async () => {
+  if (!graph.value) return
+  const text = await graph.value.exportAsSvgText({ embedImages: true })
+  const url = URL.createObjectURL(new Blob([text], { type: "octet/stream" }))
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "network-graph.svg" // filename to download
+  a.click()
+  window.URL.revokeObjectURL(url)
 }
 
 </script>

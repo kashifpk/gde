@@ -1,4 +1,3 @@
-// { "node_type": "person", "label": "Bajwa", "display_type": "image", "display_value": "/static/gmedia/images/bajwa.jpg" }
 
 export interface NodeMetaInformation {
     node_type: string | null
@@ -8,10 +7,18 @@ export interface NodeMetaInformation {
 }
 
 
+export interface LinkInfo {
+    _key: string
+    source: string
+    target: string
+    _meta: NodeInformationSchema
+    linked_node: NodeInformationSchema
+}
+
 export interface NodeInformationSchema {
     _key: string
     _meta: NodeMetaInformation
     extra_info: object
-    _links: (string | null)[]
+    _links: (LinkInfo | null)[]
     [x: string]: unknown  // allow extra fields
 }

@@ -1,8 +1,10 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 
 
 function mountVueComponent(elementId, Component) {
   const elem = document.getElementById(elementId)
+  const pinia = createPinia()
   const app = createApp(Component)
   // Register a global custom directive called `v-focus`
   // app.directive('focus', {
@@ -12,6 +14,7 @@ function mountVueComponent(elementId, Component) {
   //   el.focus()
   //   }
   // })
+  app.use(pinia)
   app.mount(elem)
 }
 

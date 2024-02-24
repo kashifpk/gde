@@ -1,7 +1,7 @@
 <style>
 .linked-content {
   display: flex;
-  gap: 2em;
+  gap: 1em;
   margin-left: 1em;
 }
 </style>
@@ -9,19 +9,7 @@
 <template>
 
   <h2>GDE Detail {{ itemData._key }}</h2>
-
-
-  <div>
-
-    <NodeInfoDisplay v-if="Object.keys(itemData).length > 0" :node-info="itemData" />
-
-    <div v-if="itemData.hasOwnProperty('_links') && itemData._links.length > 0" class="linked-content">
-      <div v-for="linkData in itemData._links">
-        <!-- <h3>{{ linkData._meta.label }}</h3> -->
-        <NodeInfoDisplay :title="linkData._meta.label" :node-info="linkData.linked_node" />
-      </div>
-    </div>
-  </div>
+  <NodeInfoDisplay v-if="Object.keys(itemData).length > 0" :node-info="itemData" show-links />
 
   <code>{{ JSON.stringify(itemData, null, 2) }}</code>
 </template>

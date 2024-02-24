@@ -16,9 +16,10 @@
 
 <template>
   <div class="node-container" :style="{ borderColor: getRandomColor() }">
-    <h3 v-if="title"> {{ title }}</h3>
+    <h5 v-if="title"> {{ title }}</h5>
+    <h4>{{nodeInfo._meta.label}}</h4>
     <div class="node-info">
-      <h3>{{nodeInfo._meta.label}}</h3>
+
       <img
         v-if="nodeInfo._meta.display_type=='image'"
         :src="nodeInfo._meta.display_value" style="max-width: 100%;"
@@ -41,7 +42,12 @@
           </tr>
         </tbody>
       </MDBTable>
+    </div>
 
+    <div v-if="showLinks==true && nodeInfo._links.length > 0" class="linked-content">
+      <div v-for="linkData in nodeInfo._links">
+        <NodeInfoDisplay :title="linkTitle(linkData)" :node-info="linkData.linked_node" />
+      </div>
     </div>
   </div>
 
@@ -50,10 +56,11 @@
 <script setup lang="ts">
   import { onMounted, ref } from "vue"
   import { MDBTable } from "mdb-vue-ui-kit";
-  import type {NodeInformationSchema} from "../type_defs.ts"
+  import type {LinkInfo, NodeInformationSchema} from "../type_defs.ts"
 
   interface Props {
-    title: String | null
+    title: String | unknown
+    showLinks?: boolean
     nodeInfo: NodeInformationSchema
   }
   const props = defineProps<Props>()
@@ -71,6 +78,16 @@
 
   const getRandomColor = () => {
     return "hsl(" + Math.random() * 360 + ", 100%, 75%)";
+  }
+
+  const linkTitle = (link: LinkInfo) => {
+    console.log('----------------')
+    console.log(props.nodeInfo)
+    console.log(link)
+    if (link.source == props.nodeInfo._key)
+      return props.nodeInfo._meta.label + " -> " + link._meta.label + " -> " + link.linked_node._meta.label
+    else
+      return link.linked_node._meta.label +  " -> " + link._meta.label + " -> " + props.nodeInfo._meta.label
   }
 
 </script>
