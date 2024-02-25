@@ -127,16 +127,31 @@ const updateEditorFields = () => {
 
 }
 
+const getMetaLabel = () => {
+  if (fieldsData.value.label)
+    return fieldsData.value.label
+
+  if (fieldsData.value.node_type) {
+    if (fieldsData.value[store.nodeTypes[fieldsData.value.node_type].label_field])
+      return fieldsData.value[store.nodeTypes[fieldsData.value.node_type].label_field]
+  }
+
+  return fieldsData.value._key
+}
+
 const save = () => {
   if (extra_info.value) {
     console.log("have extra info")
     fieldsData.value.extra_info = JSON.parse(extra_info.value)
   }
   console.log("fieldsData on save", fieldsData.value)
-  const meta = {
-    label: fieldsData.value.label,
-    node_type: fieldsData.value.node_type
+  let meta = {
+    label: getMetaLabel(),
+    node_type: fieldsData.value.node_type,
+    display_type: fieldsData.value.node_type ? store.nodeTypes[fieldsData.value.node_type].default_display_type : null,
+    display_value: fieldsData.value.node_type ? store.nodeTypes[fieldsData.value.node_type].default_display_value : null
   }
+
 
   fieldsData.value._meta = {...meta}
   delete fieldsData.value.label

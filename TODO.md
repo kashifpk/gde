@@ -29,11 +29,11 @@
 - [ ] When updating nodes/edges don't set derived/calculated fields. Like label if it's not present and is fetched from node_type etc then on update it should not be set as a value on the node unless the user actually sets it.
 - [x] Bug: Nodes without any node type don't have a fill color in graph display.
 - [ ] Bug: Newly created edges are not editable (error says missing _meta field) until they are saved and loaded back from DB.
-- [ ] Bug: Newly created nodes don't show node key as label if no node label was provided.
-- [ ] Bug: Newly created nodes don't display node color according to type (because that is fetched from the DB and theses nodes have not yet been saved).
+- [x] Bug: Newly created nodes don't show node key as label if no node label was provided.
+- [x] Bug: Newly created nodes don't display node color according to type (because that is fetched from the DB and theses nodes have not yet been saved).
 - [ ] Bug: Editing a node only displays key, type and extra info. No other field is displayed.
 - [ ] Start implementing RCO graph.
-- [ ] Bug: Node meta doesn't take affect for newly created/edited nodes. Only works when loaded from DB.
+- [x] Bug: Node meta doesn't take affect for newly created/edited nodes. Only works when loaded from DB.
 - [ ] Node types management interface
 - [x] Export graph as SVG
 - [ ] Export and Import Graph (dumps and loads as JSON)
