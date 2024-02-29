@@ -61,15 +61,11 @@ const fieldsData = ref({})
 const nodeTypes = ref({})
 const nodeTypeNames = ref([])
 const editorFields = ref([])
-const haveLabel = ref(false)
 
 
 onMounted(async () => {
   fieldsData.value = {...props.modelValue}
-  if (props.nodeType == 'edge') {
-    editorFields.value.splice(1, 0, {name: 'source', label: "Source", value: props.modelValue['source'], required: true});
-    editorFields.value.splice(2, 0, {name: 'target', label: "Target", value: props.modelValue['target'], required: true});
-  }
+
   extra_info.value = JSON.stringify(props.modelValue.extra_info, null, 2)
   console.log("model value:", props.modelValue)
 
@@ -83,8 +79,7 @@ onMounted(async () => {
 watch(
   fieldsData,
   () => {
-
-    updateEditorFields()
+    buildEditorFields()
   },
   { deep: true }
 )
@@ -95,36 +90,25 @@ const updateFieldsData = () => {
 }
 
 const buildEditorFields = () => {
-  console.log("buildEditorFields", editorFields.value)
+  // empty editorFields.value array
+  editorFields.value = []
+
   editorFields.value.push({name: '_key', label: "Key", required: true})
-  editorFields.value.push({name: 'node_type', label: 'Type', choices: nodeTypeNames.value})
-  updateEditorFields()
-}
-
-const updateEditorFields = () => {
-  // update editor fields when node type is changed adding/removing fields for that node.
-  console.log("updateEditorFields", fieldsData.value, editorFields.value)
-  if(fieldsData.value.node_type == "" && haveLabel.value == false) {
-    fieldsData.value.label = ""
-    editorFields.value.push({name: 'label', label: "Node Label"})
-    haveLabel.value = true
+  if (props.nodeType == 'edge') {
+    editorFields.value.splice(1, 0, {name: 'source', label: "Source", value: props.modelValue['source'], required: true});
+    editorFields.value.splice(2, 0, {name: 'target', label: "Target", value: props.modelValue['target'], required: true});
   }
+  editorFields.value.push({name: 'node_type', label: 'Type', choices: nodeTypeNames.value})
 
-  if(fieldsData.value.node_type != "" && haveLabel.value == true) {
-    // find object in editosFields.value array and remove it
-    const index = editorFields.value.findIndex(obj => obj.name === 'label')
-    // remove element in editorFields.value array at index
-    editorFields.value.splice(index, 1)
-
-    delete fieldsData.value.label
-    haveLabel.value = false
-
+  if(fieldsData.value.node_type == "" )
+    editorFields.value.push({name: 'label', label: "Node Label"})
+  else {
     // add fields from nodeTypes.value.fields for the current selected node into editorFields
+    console.log("trying to add fields based on node type")
     nodeTypes.value[fieldsData.value.node_type].fields.forEach(field => {
       editorFields.value.push(field)
     })
   }
-
 }
 
 const getMetaLabel = () => {

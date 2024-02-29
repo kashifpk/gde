@@ -128,49 +128,25 @@ by the background circle. */
       <template #override-node="{ nodeId, scale, config, ...slotProps }">
 
         <!-- circle for filling background -->
-        <circle
-          :r="config.radius * scale"
-          :fill="getNodeColor(nodes[nodeId])"
-          v-bind="slotProps"
-        />
+        <circle :r="config.radius * scale" :fill="getNodeColor(nodes[nodeId])" v-bind="slotProps" />
 
         <!-- Use v-html to interpret escape sequences for icon characters. -->
 
-        <text
-          v-if="nodes[nodeId]._meta.display_type=='icon'"
-          font-family="Material Icons"
-          :font-size="22 * scale"
-          fill="#dddddd"
-          text-anchor="middle"
-          dominant-baseline="central"
-          style="pointer-events: none"
-          v-html="nodes[nodeId]._meta.display_value"
-        />
+        <text v-if="nodes[nodeId]._meta.display_type == 'icon'" font-family="Material Icons" :font-size="22 * scale"
+          fill="#dddddd" text-anchor="middle" dominant-baseline="central" style="pointer-events: none"
+          v-html="nodes[nodeId]._meta.display_value" />
 
         <!--
           The base position of the <image /> is top left. The node's
           center should be (0,0), so slide it by specifying x and y.
         -->
-        <image
-          v-if="nodes[nodeId]._meta.display_type=='image'"
-          class="face-picture"
-          :x="-config.radius * scale"
-          :y="-config.radius * scale"
-          :width="config.radius * scale * 2"
-          :height="config.radius * scale * 2"
-          :xlink:href="nodes[nodeId]._meta.display_value"
-          clip-path="url(#faceCircle)"
-        />
+        <image v-if="nodes[nodeId]._meta.display_type == 'image'" class="face-picture" :x="-config.radius * scale"
+          :y="-config.radius * scale" :width="config.radius * scale * 2" :height="config.radius * scale * 2"
+          :xlink:href="nodes[nodeId]._meta.display_value" clip-path="url(#faceCircle)" />
 
         <!-- circle for drawing stroke -->
-        <circle
-          class="face-circle"
-          :r="config.radius * scale"
-          fill="none"
-          stroke="#cccccc"
-          :stroke-width="1 * scale"
-          v-bind="slotProps"
-        />
+        <circle class="face-circle" :r="config.radius * scale" fill="none" stroke="#cccccc" :stroke-width="1 * scale"
+          v-bind="slotProps" />
 
       </template>
 
@@ -194,7 +170,7 @@ by the background circle. */
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 
@@ -217,6 +193,7 @@ import NodeEditor from "./components/NodeEditor.vue";
 import ConfigurationPanel from "./components/ConfigurationPanel.vue";
 
 import { getNodeColor, getEdgeColor, getNodeTypes } from './graph_nodes_utils.ts'
+import type { NodeInformationSchema } from "./type_defs.ts"
 
 const store = useStore()
 const search = ref("")
@@ -235,7 +212,7 @@ const editorMode = ref("")
 const currentNodeType = ref("")
 
 const newNodePosition = { x: 10, y: 10 }
-const nodeData = ref({})
+const nodeData = ref<NodeInformationSchema>()
 const linkMode = ref(false)
 const newLinkFrom = ref("")
 const newLinkTo = ref("")
@@ -331,50 +308,58 @@ const eventHandlers = {
     }
   },
   "node:dblclick": ({ node }) => {
-    let data = nodes.value[node]
-    data._key = node
-
-    nodeData.value = { ...data }
-    editorMode.value = 'update'
-    currentNodeType.value = 'node'
-
-    displayEditorModal.value = true
+    let ndata = nodes.value[node]
+    ndata._key = node
+    showNodeEditor('update', 'node', null, ndata)
   },
   "edge:dblclick": ({ edge }) => {
-    let data = edges.value[edge]
-    data._key = edge
-
-    nodeData.value = { ...data }
-    editorMode.value = 'update'
-    currentNodeType.value = 'edge'
-
-    displayEditorModal.value = true
-
+    let edata = edges.value[edge]
+    edata._key = edge
+    showNodeEditor('update', 'edge', null, edata)
   },
   "view:dblclick": async (e) => {
-
-    const viewBox = graph.value.getViewBox()
-
-    editorMode.value = 'new'
-    currentNodeType.value = 'node'
-
-    // ** Best so far
-    newNodePosition.x = e.event.offsetX + viewBox.left
-    newNodePosition.y = e.event.offsetY + viewBox.top
-
-    console.log("new node position", newNodePosition)
-
-    displayEditorModal.value = true
-    nodeData.value._key = graphName.value + '-'
-    nodeData.value.label = null
-    nodeData.value.extra_info = {}
-    nodeData.value._meta = {}
+    showNodeEditor('new', 'node', e)
   }
 }
 
 onMounted(async () => {
   await store.loadNodeTypes()
 });
+
+const showNodeEditor = (
+  mode: 'new' | 'update',
+  nodeType: 'node' | 'edge',
+  e=null,
+  data: NodeInformationSchema | null = null
+) => {
+
+  editorMode.value = mode
+  currentNodeType.value = nodeType
+
+  if (mode == 'new' && nodeType == 'node') {
+    // ** Best so far
+    const viewBox = graph.value.getViewBox()
+    newNodePosition.x = e.event.offsetX + viewBox.left
+    newNodePosition.y = e.event.offsetY + viewBox.top
+    console.log("new node position", newNodePosition)
+  }
+
+
+  if (mode == 'new') {
+    nodeData.value = {
+      _key: graphName.value + '-',
+      label: null,
+      extra_info: {},
+      _meta: { node_type: null, label: null, display_type: null, display_value: null },
+      _links: []
+    }
+  } else { // mode is update
+    nodeData.value = { ...data }
+  }
+
+  displayEditorModal.value = true
+
+}
 
 const nodeEditorUpdated = () => {
   if (editorMode.value == 'new' && currentNodeType.value == 'node') {
@@ -397,7 +382,11 @@ const addNewNode = () => {
 
 const addNewEdge = () => {
   const linkKey = newLinkFrom.value + '_' + newLinkTo.value
-  edges.value[linkKey] = { source: newLinkFrom.value, target: newLinkTo.value, _meta: {} }
+  edges.value[linkKey] = {
+    source: newLinkFrom.value,
+    target: newLinkTo.value,
+    _meta: { node_type: null, label: null, display_type: null, display_value: null }
+  }
   newLinkFrom.value = ""
   newLinkTo.value = ""
 }

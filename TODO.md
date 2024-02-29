@@ -28,10 +28,13 @@
 - [x] State management via Pinia and use it for storing node types information.
 - [ ] When updating nodes/edges don't set derived/calculated fields. Like label if it's not present and is fetched from node_type etc then on update it should not be set as a value on the node unless the user actually sets it.
 - [x] Bug: Nodes without any node type don't have a fill color in graph display.
-- [ ] Bug: Newly created edges are not editable (error says missing _meta field) until they are saved and loaded back from DB.
+- [x] Bug: Newly created edges are not editable (error says missing _meta field) until they are saved and loaded back from DB.
+- [x] Bug: Edge update doesn't update.
 - [x] Bug: Newly created nodes don't show node key as label if no node label was provided.
 - [x] Bug: Newly created nodes don't display node color according to type (because that is fetched from the DB and theses nodes have not yet been saved).
-- [ ] Bug: Editing a node only displays key, type and extra info. No other field is displayed.
+- [x] Bug: Editing a node only displays key, type and extra info. No other field is displayed.
+  - only happens if node type is set
+- [x] Bug: Editing a node does not show label from _meta
 - [ ] Start implementing RCO graph.
 - [x] Bug: Node meta doesn't take affect for newly created/edited nodes. Only works when loaded from DB.
 - [ ] Node types management interface
@@ -44,4 +47,7 @@
     - [ ] Get linked data
     - [ ] Ability to expand a record (fetch linked records)
 - [x] Typescript support
-- [ ] Content type display components (image, location/map, event, etc)
+- [ ] Content type display components (image, location/map, event, etc) - Would be based on field content type
+  - [ ] Allow custom fields (location, ip, domain, etc)
+
+- [ ] Node content type and field type are same (A domain can be a node or a field within a node)

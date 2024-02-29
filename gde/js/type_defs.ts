@@ -11,7 +11,7 @@ export interface LinkInfo {
     _key: string
     source: string
     target: string
-    _meta: NodeInformationSchema
+    _meta: NodeMetaInformation
     linked_node: NodeInformationSchema
 }
 
