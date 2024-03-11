@@ -109,7 +109,7 @@ by the background circle. */
         <component is="style">
           @font-face { font-family: 'Material Icons'; font-style: normal; font-weight:
           400; src:
-          url(https://fonts.gstatic.com/s/materialicons/v97/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
+          url(http://127.0.0.1:7777/static/fonts/materialicons.woff2)
           format('woff2'); }
         </component>
 

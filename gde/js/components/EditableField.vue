@@ -90,16 +90,7 @@
           :extensions="codemirrorExtensions"
         />
       </template>
-      <template v-if="props.contentType=='checkbox'">
-        <input type="checkbox"
-          v-model="fieldValue"
-          @update:model-value="$emit('update:modelValue', fieldValue)"
-           />
-        <!-- <label for="checkbox">{{ $props.label }}</label> -->
-      </template>
-      <template v-if="supportedFields.includes($props.contentType) && !fieldsWithSpecialControls.includes($props.contentType)">
-
-
+      <template v-else>
         <input v-if="props.choices.length == 0"
           type="text"
           ref="inputFieldRef"
@@ -131,9 +122,7 @@
   import { oneDark } from "@codemirror/theme-one-dark"
   const codemirrorExtensions = [json(), oneDark]
 
-  const supportedFields = ['text', 'json', 'python', 'image', 'color', 'icon', 'checkbox']
-  const fieldsWithSpecialControls = ['json', 'checkbox']
-  const emit = defineEmits(['update:modelValue'])
+
   const props = defineProps({
     modelValue: {
       type: String,
@@ -142,10 +131,10 @@
     contentType: {
       type: String,
       default: "text",
-      // validator(value: string, props) {
-      //   // The value must match one of these strings
-      //   return supportedFields.includes(value)
-      // }
+      validator(value: string, props) {
+        // The value must match one of these strings
+        return ['text', 'json', 'python'].includes(value)
+      }
     },
     label: {
       type: String,
@@ -228,4 +217,10 @@
       displayMode.value = 'view'
     }
   }
+
+  const switchToViewMode = () => {
+    displayMode.value = 'view'
+  }
+
+
 </script>

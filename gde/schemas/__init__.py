@@ -1,3 +1,5 @@
+"""Pydantic schemas for various types of graphs"""
+
 from typing import Literal
 
 from pydantic import BaseModel, computed_field, ConfigDict, Field

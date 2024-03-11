@@ -51,3 +51,19 @@
   - [ ] Allow custom fields (location, ip, domain, etc)
 
 - [ ] Node content type and field type are same (A domain can be a node or a field within a node)
+- [ ] Workflow Executor integration into GDE
+  - [ ] Steps and transitions can be node types
+  - [ ] Instead of arango models, they can become just pydantic models for verification etc. May be that won't be needed if we do dynamic validation of node types
+- [x] Support for getting fields specification from fields_schema in NodeType.
+  - [x] Use above for WE node types
+  - [x] Update API
+  - [ ] If NodeType.fields_schema is set then use it validate node_type data/dict.
+- [x] Node editor use JSON editor for object and array types
+- [ ] Schema for Graph/Task input, output and config objects.
+  - [ ] Also support for empty template of these in UI
+- [x] Support for boolean fields as check boxes
+- [x] WE Task.executor field should be a list of supported executors.
+  - [x] Would need to support that from schema
+- [x] For JSON objects use {} as the empty value instead of null in fields.
+- [x] Use local google icons font
+- [x] Only show node types of type node for nodes and edge for edges in the add/update dialog.

@@ -2,7 +2,7 @@ from arango_orm import Database
 
 from ..utils.dict_list_tools import dict_set_if_none_or_missing
 from ..db.models import NodeType, Node, Link
-from ..schema import NodeMetaInformation, NodeResponseSchema, LinkSchema
+from ..schemas import NodeMetaInformation, NodeResponseSchema, LinkSchema
 
 
 class NodeManager:

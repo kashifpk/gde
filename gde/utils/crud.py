@@ -29,7 +29,9 @@ class CRUDAPIBase(APIView):
     def list(self, db: Database = Depends(get_db)) -> list[dict]:
         "List records"
         ret = []
-        recs = db.query(self.MODEL).all()
+        q = db.query(self.MODEL)
+        recs = q.all()
+
         for r in recs:
             ret.append(r.model_dump(mode='json', by_alias=True))
 

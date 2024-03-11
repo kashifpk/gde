@@ -15,7 +15,7 @@ from .utils.node_manager import NodeManager
 from .db import get_db
 from .db.models import GeneralGraph, UserGraph, Node, Link, NodeType
 
-from .schema import GraphSchema, NodeResponseSchema
+from .schemas import GraphSchema, NodeResponseSchema
 
 log = logging.getLogger(__name__)
 
