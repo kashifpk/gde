@@ -1,13 +1,13 @@
 <style>
 .graph {
   border: 1px solid #837f7f;
-  height: 89vh;
+  height: 90vh;
 
 }
 
 #graph-div {
-  width: 99%;
-  margin-top: 5vh;
+  width: 98%;
+  margin-top: 7vh;
 
 }
 
@@ -37,67 +37,32 @@ by the background circle. */
 </style>
 
 <template>
-  <MDBNavbar dark bg="dark" position="top" container classContainer="justify-content-start">
-    <MDBNavbarBrand>
-      <MDBIcon icon="share-nodes" size="1x" />
-    </MDBNavbarBrand>
+  <v-layout>
+    <v-app-bar>
+      <template v-slot:prepend>
 
-    <MDBNavbarNav class="d-flex flex-row">
-      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
-        <MDBBtn outline="light" floating title="New graph" @click="newGraph()">
-          <MDBIcon icon="file"></MDBIcon>
-        </MDBBtn>
-      </MDBNavbarItem>
+        <v-app-bar-nav-icon :icon="mdiGraph"></v-app-bar-nav-icon>
 
-      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
-        <MDBBtn outline="light" floating title="Load graph" @click="loadGraph()">
-          <MDBIcon icon="book-open"></MDBIcon>
-        </MDBBtn>
-      </MDBNavbarItem>
+        <v-btn class="ms-2" title="New graph" :icon="mdiFilePlus" @click="newGraph()"></v-btn>
+        <v-btn class="ms-2" title="Load graph" :icon="mdiBookOpenBlankVariantOutline" @click="loadGraph()"></v-btn>
+        <v-btn class="ms-2" title="Save graph" :icon="mdiContentSave" @click="saveGraph()"></v-btn>
 
-      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
-        <MDBBtn outline="light" floating title="Save graph" @click="saveGraph()">
-          <MDBIcon icon="save"></MDBIcon>
-        </MDBBtn>
-      </MDBNavbarItem>
+        <Field v-model="graphName" label="Graph" no-separate-label />
 
-      <MDBNavbarItem class="me-3 me-lg-0 ps-4">
-        <Field v-model="graphName" label="Graph" class="mb-2" no-separate-label />
-      </MDBNavbarItem>
+        <v-btn class="ms-2" :icon="mdiOpenInNew" title="Open node/edge detail view window"
+          @click="openDetailWindow()"></v-btn>
+        <v-btn class="ms-2" title="Save SVG" :icon="mdiDownloadCircleOutline" @click="saveSVG"></v-btn>
 
-      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
-        <MDBBtn outline="light" floating title="Open node/edge detail view window" @click="openDetailWindow()">
-          <MDBIcon icon="fas fa-external-link-alt"></MDBIcon>
-        </MDBBtn>
-      </MDBNavbarItem>
+      </template>
 
-      <MDBNavbarItem class="me-3 me-lg-0 ps-2">
-        <MDBBtn outline="light" floating title="Save as SVG" @click="saveSVG">
-          <MDBIcon icon="fas fa-download"></MDBIcon>
-        </MDBBtn>
-      </MDBNavbarItem>
+      <template v-slot:append>
+        <v-switch class="pt-4 pe-4 ms-2" v-model="linkMode" label="Link mode" title="Toggle link mode (L)" color="orange"
+          density="compact" inset flat />
 
-    </MDBNavbarNav>
+      </template>
+    </v-app-bar>
 
-    <MDBSwitch v-model="linkMode" label="Link mode" />
-
-    <form class="d-flex input-group w-auto ps-4">
-      <MDBInput class="d-flex w-auto ps-4 border border-end-0" inputGroup :formOutline="false" v-model="search"
-        aria-label="Dollar amount (with dot and two decimal places)">
-        <span class="input-group-text border border-start-0">
-          <MDBIcon icon="search"></MDBIcon>
-        </span>
-
-      </MDBInput>
-      <!-- <input
-        type="search"
-        class="form-control"
-        placeholder="Type query"
-        aria-label="Search"
-      />
-      <MDBBtn outline="light"> Search </MDBBtn> -->
-    </form>
-  </MDBNavbar>
+  </v-layout>
 
   <ConfigurationPanel />
   <div id="graph-div" ref="graphDiv">
@@ -159,11 +124,10 @@ by the background circle. */
 
   </div>
 
-  <MDBModal id="nodeEditor" tabindex="-1" v-model="displayEditorModal" size="lg" centered scrollable>
+  <v-dialog id="nodeEditor" tabindex="-1" v-model="displayEditorModal" retain-focus width="auto" scrollable>
     <NodeEditor :mode="editorMode" :node-type="currentNodeType" v-model="nodeData" @cancel="displayEditorModal = false"
       @save="nodeEditorUpdated()" />
-  </MDBModal>
-
+  </v-dialog>
 
   <div class="text-center status" :class="{ 'text-danger': hasError }" style="height: 2vh;">
     {{ statusMessage }}
@@ -175,6 +139,7 @@ by the background circle. */
 import axios from "axios";
 
 import { VNetworkGraph, VEdgeLabel } from "v-network-graph"
+import * as vNG from "v-network-graph"
 import "v-network-graph/lib/style.css"
 
 import { useActiveElement, useMagicKeys, whenever } from '@vueuse/core'
@@ -182,10 +147,9 @@ import { logicAnd } from '@vueuse/math'
 
 import { onMounted, computed, ref } from "vue";
 import {
-  MDBRow, MDBCol, MDBTooltip,
-  MDBModal, MDBNavbar, MDBNavbarBrand, MDBNavbarNav, MDBNavbarItem,
-  MDBBtn, MDBInput, MDBSwitch, MDBIcon
-} from "mdb-vue-ui-kit";
+  mdiGraph, mdiFilePlus, mdiHeart, mdiBookOpenBlankVariantOutline,
+  mdiContentSave, mdiOpenInNew, mdiDownloadCircleOutline
+} from '@mdi/js'
 
 import { useStore } from "./store.ts";
 import Field from "./components/Field.vue";
@@ -203,7 +167,7 @@ const hasError = ref(false)
 const displayEditorModal = ref(false)
 
 const graphName = ref("untitled")
-const graph = ref()
+const graph = ref<vNG.Instance>()
 const graphDiv = ref(null)
 
 const detailWindow = ref(null)
@@ -240,16 +204,11 @@ whenever(logicAnd(l, notUsingInput), () => {
 })
 
 const nodes = ref({
-  // node1: { name: "Node 1" },
-  // node2: { name: "Node X" },
-  // node3: { name: "Node 3" },
-  // node4: { name: "Node 4" },
+  // node1: { name: "Node 1", ...other_node_data },
 })
 
 const edges = ref({
   // edge1: { source: "node1", target: "node2" },
-  // edge2: { source: "node2", target: "node3" },
-  // edge3: { source: "node3", target: "node4" },
 })
 
 const layouts = ref({
@@ -329,7 +288,7 @@ onMounted(async () => {
 const showNodeEditor = (
   mode: 'new' | 'update',
   nodeType: 'node' | 'edge',
-  e=null,
+  e = null,
   data: NodeInformationSchema | null = null
 ) => {
 
@@ -337,10 +296,12 @@ const showNodeEditor = (
   currentNodeType.value = nodeType
 
   if (mode == 'new' && nodeType == 'node') {
-    // ** Best so far
-    const viewBox = graph.value.getViewBox()
-    newNodePosition.x = e.event.offsetX + viewBox.left
-    newNodePosition.y = e.event.offsetY + viewBox.top
+    const point = { x: event.offsetX, y: event.offsetY }
+    // translate coordinates: DOM -> SVG
+    const svgPoint = graph.value.translateFromDomToSvgCoordinates(point)
+    console.log(svgPoint)
+    newNodePosition.x = svgPoint.x
+    newNodePosition.y = svgPoint.y
     console.log("new node position", newNodePosition)
   }
 

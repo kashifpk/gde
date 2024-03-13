@@ -16,7 +16,6 @@
 
 <script setup>
   import {onMounted, ref} from "vue";
-  import { MDBTable, MDBRow, MDBCol } from "mdb-vue-ui-kit";
   import axios from "axios";
   import NodeInfoDisplay from "./components/NodeInfoDisplay.vue";
 

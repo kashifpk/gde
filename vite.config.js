@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vuetify from 'vite-plugin-vuetify';
 import { config } from 'dotenv';
 
 import path from "path";
@@ -17,7 +18,8 @@ export default defineConfig({
     devSourcemap: true,
   },
   plugins: [
-    vue()
+    vue(),
+    vuetify({ autoImport: true }),
   ],
   build: {
     target: "esnext",

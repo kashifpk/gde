@@ -19,7 +19,7 @@
   position: relative;
   padding: 5px 10px;
 }
-.gde-field input {
+.gde-field input, select {
   background-color: rgb(57, 57, 57);
   padding: 3px 10px;
   box-sizing: border-box;
@@ -32,6 +32,7 @@
 .input-with-label, select {
   width: 80%;
 }
+
 
 .input-without-label {
   width: 100%;
@@ -69,7 +70,7 @@
 <template>
   <div class="field-wrapper">
     <div v-if="displayMode=='view'" class="gde-display" @click="switchToEditMode()">
-      <label v-if="props.noSeparateLabel==false" class="label-in-border">
+      <label v-if="props.noSeparateLabel==false" class="label-in-border pe-1">
         {{ props.label }}
       </label>
       {{ inputValue }}
@@ -77,6 +78,7 @@
 
     <div v-if="displayMode=='edit'" class="gde-field">
       <label v-if="!labelBeingDisplayedInContent"
+             class="pe-1"
              :class="[props.noSeparateLabel==true ? 'label-in-border' : 'side-label']"
              >
         {{ props.label }}
@@ -113,6 +115,7 @@
         <select v-if="props.choices.length > 0"
           size="1"
           :value="inputValue"
+          :class="[props.modelValue=='' ? 'dimmed-text' : 'normal-text', props.noSeparateLabel==true ? 'input-without-label' : 'input-with-label']"
           @change="$emit('update:modelValue', $event.target.value)">
           <option v-if="props.required == false"></option>
           <option v-for="choice in props.choices">{{ choice }}</option>
@@ -125,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, computed, ref, reactive, watch, nextTick} from "vue"
+  import { onMounted, computed, ref, nextTick} from "vue"
   import { Codemirror } from "vue-codemirror"
   import { json } from "@codemirror/lang-json"
   import { oneDark } from "@codemirror/theme-one-dark"

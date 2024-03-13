@@ -17,15 +17,17 @@
     "axios": "^1.5.1",
     "codemirror": "^6.0.1",
     "dotenv": "^16.3.1",
-    "mdb-vue-ui-kit": "^4.1.1",
     "pinia": "^2.1.7",
     "v-network-graph": "^0.9.15",
     "vue": "^3.4.2",
-    "vue-codemirror": "^6.1.1"
+    "vue-codemirror": "^6.1.1",
+    "vuetify": "^3.5.9"
   },
   "devDependencies": {
+    "@mdi/js": "^7.4.47",
     "@vitejs/plugin-vue": "^4.2.3",
     "typescript": "^5.3.3",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vite-plugin-vuetify": "^2.0.3"
   }
 }

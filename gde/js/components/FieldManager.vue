@@ -56,7 +56,6 @@
 </template>
 
 <script setup>
-import { MDBCheckbox } from "mdb-vue-ui-kit";
 
 </script>
 

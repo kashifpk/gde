@@ -2,8 +2,8 @@
 
   .panel {
     position: absolute;
-    left: 99.2%;
-    top: 8vh;
+    left: 99.8%;
+    top: 7vh;
     z-index: 1;
     column-gap: 1vh;
     width: 1%;
@@ -47,7 +47,7 @@
 
   .panel-title {
     background-color: #242424;
-    height: 5vh;
+    height: 6vh;
     padding: 6px;
     border-bottom: solid #4b4a4a;
   }
@@ -67,9 +67,8 @@
   <div v-if="isPanelOpen" class="panel-content">
     <div class="panel-title">
       {{ activePanel }}
-      <MDBBtn class="float-end" color="link" title="Collapse" @click="collapsePanel()">
-        <MDBIcon solid icon="chevron-right"></MDBIcon>
-      </MDBBtn>
+      <v-btn class="float-right" :icon="mdiChevronRight" color="link" title="Collapse" @click="collapsePanel()">
+      </v-btn>
     </div>
 
     <NodeTypeManager v-if="activePanel == 'Node Manager'"></NodeTypeManager>
@@ -82,9 +81,7 @@
 <script setup>
 
 import { onMounted, computed, ref, reactive, watch, nextTick} from "vue"
-import { MDBModal, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter,
-         MDBInput, MDBTextarea, MDBBtn, MDBIcon, MDBCol, MDBRow } from "mdb-vue-ui-kit"
-
+import {mdiChevronRight} from "@mdi/js"
 import NodeTypeManager from "./NodeTypeManager.vue"
 import FieldManager from "./FieldManager.vue"
 

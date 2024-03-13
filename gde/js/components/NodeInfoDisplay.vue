@@ -24,24 +24,24 @@
         v-if="nodeInfo._meta.display_type=='image'"
         :src="nodeInfo._meta.display_value" style="max-width: 100%;"
       />
-      <MDBTable responsive striped hover dark>
+      <v-table responsive striped hover dark>
         <tbody>
           <tr v-for="k in firstLevelKeys">
             <th style="width: 15%;">{{ k }}</th>
             <td>{{ nodeInfo[k] }}</td>
           </tr>
         </tbody>
-      </MDBTable>
+      </v-table>
 
       <hr />
-      <MDBTable responsive striped hover dark v-if="nodeInfo.hasOwnProperty('extra_info')">
+      <v-table responsive striped hover dark v-if="nodeInfo.hasOwnProperty('extra_info')">
         <tbody>
           <tr v-for="k in Object.keys(nodeInfo.extra_info)">
             <th style="width: 15%;">{{ k }}</th>
             <td>{{ nodeInfo.extra_info[k] }}</td>
           </tr>
         </tbody>
-      </MDBTable>
+      </v-table>
     </div>
 
     <div v-if="showLinks==true && nodeInfo._links.length > 0" class="linked-content">
@@ -55,7 +55,6 @@
 
 <script setup lang="ts">
   import { onMounted, ref } from "vue"
-  import { MDBTable } from "mdb-vue-ui-kit";
   import type {LinkInfo, NodeInformationSchema} from "../type_defs.ts"
 
   interface Props {

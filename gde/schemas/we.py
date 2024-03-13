@@ -15,6 +15,7 @@ from datetime import datetime
 # executing the workflow
 # May be rename these? GraphInfo = WorkflowInfo, etc.
 
+
 class GraphInfo(BaseModel):
     name: str
     description: str = ""
@@ -24,10 +25,10 @@ class GraphInfo(BaseModel):
 
 
 class Task(BaseModel):
-    _schema_extra = {'executor': {'choices': ['python', 'os', 'subgraph']}}
+    _schema_extra = {"executor": {"choices": ["python", "os", "subgraph"]}}
 
     name: str
-    executor: Literal['python', 'os', 'subgraph']
+    executor: Literal["python", "os", "subgraph"]
     call: str
     execute_async: bool = False
     plugins: dict = {}

@@ -1,24 +1,42 @@
 <template>
-  <MDBModalHeader>
-    <MDBModalTitle> Add Node </MDBModalTitle>
-  </MDBModalHeader>
+  <v-card
+    density="comfortable"
+    min-width="40vw"
+    max-width="80vw"
+    prepend-icon="mdi-update"
+    title="Add/Update Node"
+    elevated
+  >
+    <v-card-text>
+      <DataEditor :fields="editorFields" v-model="fieldsData" initial-mode="edit" />
+      <hr />
+      <form>
+        <label for="extra-info">Extra info</label>
+        <Codemirror id="extra-info"
+          v-model="extra_info"
+          :style="{height: '240px'}"
+          :extensions="codemirrorExtensions"
+        />
+      </form>
+    </v-card-text>
 
-  <MDBModalBody>
-    <DataEditor :fields="editorFields" v-model="fieldsData" initial-mode="edit" />
-    <hr />
-    <form>
-      <label for="extra-info">Extra info</label>
-      <Codemirror id="extra-info"
-        v-model="extra_info"
-        :style="{height: '240px'}"
-        :extensions="codemirrorExtensions"
-      />
-    </form>
-  </MDBModalBody>
-  <MDBModalFooter>
-    <MDBBtn color="secondary" @click="$emit('cancel')">Cancel</MDBBtn>
-    <MDBBtn color="primary" @click="save()">Save changes</MDBBtn>
-  </MDBModalFooter>
+
+    <template v-slot:actions>
+      <v-spacer></v-spacer>
+      <v-btn size="large" :prepend-icon="mdiCloseCircle" @click="$emit('cancel')">
+        <template v-slot:prepend>
+          <v-icon color="danger"></v-icon>
+        </template>
+        Cancel
+      </v-btn>
+      <v-btn size="large" :prepend-icon="mdiCheckCircle" @click="save()">
+        <template v-slot:prepend>
+          <v-icon color="success"></v-icon>
+        </template>
+        Save
+      </v-btn>
+    </template>
+  </v-card>
 
 </template>
 
@@ -26,8 +44,8 @@
 
   import axios from "axios"
   import { onMounted, computed, ref, reactive, watch, nextTick} from "vue"
-  import { MDBModal, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter,
-          MDBInput, MDBTextarea, MDBBtn, MDBCol, MDBRow } from "mdb-vue-ui-kit"
+  import { mdiCheckCircle, mdiCloseCircle } from '@mdi/js'
+
   import { Codemirror } from "vue-codemirror"
   import { json } from "@codemirror/lang-json"
   import { python } from "@codemirror/lang-python"
@@ -109,12 +127,12 @@
     }
     editorFields.value.push({name: 'node_type', data_type: "string", label: 'Type', choices: nodeTypeNames.value})
 
-    if(fieldsData.value.node_type == "" )
+    if(fieldsData.value.node_type == "" || fieldsData.value.node_type == undefined)
       editorFields.value.push({name: 'label', data_type: "string", label: "Node Label"})
     else {
       // add fields from nodeTypes.value.fields for the current selected node into editorFields
       console.log("trying to add fields based on node type")
-
+      console.log(fieldsData.value.node_type)
       nodeTypes.value[fieldsData.value.node_type].fields.forEach(field => {
         editorFields.value.push(field)
       })

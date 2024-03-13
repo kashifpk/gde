@@ -5,9 +5,9 @@
 </style>
 
 <template>
-  <template v-if="props.fields.length > 0">
-    <MDBRow v-for="field in fields">
-      <MDBCol>
+  <v-container v-if="props.fields.length > 0">
+    <v-row v-for="field in fields">
+      <v-col>
         <Field
           :label="field.label || field.name"
           :content-type="fieldsByKey[field.name].content_type"
@@ -16,17 +16,14 @@
           :initial-mode="props.initialMode"
           :required="field.required || false"
           :choices="field.choices || []" />
-      </MDBCol>
-    </MDBRow>
-  </template>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
 
-  import { onMounted, computed, ref, reactive, watch, nextTick} from "vue"
-  import { MDBModal, MDBModalHeader, MDBModalTitle, MDBModalBody, MDBModalFooter,
-          MDBInput, MDBTextarea, MDBBtn, MDBCol, MDBRow } from "mdb-vue-ui-kit"
-
+  import { onMounted, ref, watch} from "vue"
   import type {FieldSpecification, FieldsData, FieldsMap} from "../type_defs.ts"
   import Field from "./Field.vue"
 
@@ -38,8 +35,6 @@
   const props = withDefaults(defineProps<Props>(), { initialMode: "view"})
 
   const emit = defineEmits(['update:modelValue', 'cancel', 'save'])
-
-  const nodeKeyTextBox = ref()
 
   const fieldsByKey: FieldsMap = {}
   const fieldsData = ref<FieldsData>({})
